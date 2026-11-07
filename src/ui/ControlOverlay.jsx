@@ -16,7 +16,8 @@ import {
   Camera,
   Play,
   Square,
-  Search
+  Search,
+  Download
 } from 'lucide-react';
 import { CAMERA_PRESETS } from '../constants/cameraPresets';
 import MiniFloorPlan from './MiniFloorPlan';
@@ -27,6 +28,7 @@ import { TABLES_LIST } from '../constants/layoutData';
  * Thanh công cụ điều khiển giao diện nổi (Floating Luxury Toolbar):
  * - Nút chuyển nhanh 4 góc nhìn Camera Presets
  * - Nút Tour Flycam Điện Ảnh (Cinematic Drone Tour)
+ * - Nút Chụp ảnh Snapshot chất lượng cao tải về máy
  * - Nút mở bộ Prompt Render 3D (Midjourney v6 / Flux / SDXL)
  * - Chuyển đổi chế độ ánh sáng Reception Mode vs Ceremony Mode
  * - Bật tắt nhạc nền đám cưới synth, tự xoay, hiển thị số bàn, hiệu ứng Bloom
@@ -48,10 +50,12 @@ export default function ControlOverlay({
   onOpenStyleGuide,
   onOpenPromptGenerator,
   isCinematicTour,
-  onToggleCinematicTour
+  onToggleCinematicTour,
+  onTakeScreenshot
 }) {
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isCapturing, setIsCapturing] = useState(false);
 
   const handleToggleMusic = () => {
     if (isPlayingMusic) {
@@ -61,6 +65,12 @@ export default function ControlOverlay({
       weddingAudio.start();
       setIsPlayingMusic(true);
     }
+  };
+
+  const handleCaptureClick = () => {
+    setIsCapturing(true);
+    if (onTakeScreenshot) onTakeScreenshot();
+    setTimeout(() => setIsCapturing(false), 1200);
   };
 
   const getPresetIcon = (iconName) => {
@@ -114,6 +124,20 @@ export default function ControlOverlay({
 
         {/* Nút chức năng phía trên bên phải */}
         <div className="flex items-center flex-wrap gap-2">
+          {/* Nút Chụp ảnh Snapshot 3D */}
+          <button
+            onClick={handleCaptureClick}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all border shadow-lg ${
+              isCapturing
+                ? 'bg-emerald-600 text-white border-emerald-400'
+                : 'bg-white/10 text-white border-white/20 hover:bg-white/20'
+            }`}
+            title="Chụp ảnh góc nhìn hiện tại và tải về máy"
+          >
+            <Download size={14} className={isCapturing ? 'animate-bounce' : ''} />
+            <span>{isCapturing ? 'Đang lưu ảnh...' : 'Chụp ảnh 3D'}</span>
+          </button>
+
           {/* Nút Tour Flycam Điện Ảnh */}
           <button
             onClick={onToggleCinematicTour}

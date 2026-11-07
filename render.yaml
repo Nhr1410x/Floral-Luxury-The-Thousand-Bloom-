@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: thousand-bloom-3d-wedding
+    runtime: static
+    buildCommand: npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

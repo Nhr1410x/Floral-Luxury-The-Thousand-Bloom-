@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Scene from './components/Scene';
 import ControlOverlay from './ui/ControlOverlay';
 import TableModal from './ui/TableModal';
@@ -16,6 +16,9 @@ export default function App() {
   const [isStyleGuideOpen, setIsStyleGuideOpen] = useState(false);
   const [isPromptGeneratorOpen, setIsPromptGeneratorOpen] = useState(false);
   const [isCinematicTour, setIsCinematicTour] = useState(false);
+
+  // Ref chụp ảnh màn hình WebGL
+  const captureRef = useRef();
 
   // Toggle lighting mode
   const handleToggleLightMode = () => {
@@ -44,10 +47,19 @@ export default function App() {
     setIsCinematicTour((prev) => !prev);
   };
 
+  // Xử lý chụp ảnh màn hình
+  const handleTakeScreenshot = () => {
+    if (captureRef.current) {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      captureRef.current.capture(`The-Thousand-Bloom-${activePresetId}-${timestamp}.png`);
+    }
+  };
+
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-[#100E14] font-sans">
       {/* 3D WebGL Canvas Scene */}
       <Scene
+        captureRef={captureRef}
         activePresetId={activePresetId}
         lightMode={lightMode}
         selectedTable={selectedTable}
@@ -77,6 +89,7 @@ export default function App() {
         onOpenPromptGenerator={() => setIsPromptGeneratorOpen(true)}
         isCinematicTour={isCinematicTour}
         onToggleCinematicTour={handleToggleCinematicTour}
+        onTakeScreenshot={handleTakeScreenshot}
       />
 
       {/* Popover chi tiết bàn tiệc */}
