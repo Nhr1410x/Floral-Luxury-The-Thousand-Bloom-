@@ -18,7 +18,8 @@ export default function BanquetTables({
   selectedTable,
   onSelectTable,
   lightMode = 'ceremony',
-  showTableNumbers = true
+  showTableNumbers = true,
+  activeFilter = 'all'
 }) {
   const tablesCount = TABLES_LIST.length; // 46
   const chairsCount = tablesCount * 10;   // 460

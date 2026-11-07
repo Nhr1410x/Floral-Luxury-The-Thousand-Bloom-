@@ -5,17 +5,14 @@ import { PALETTE, PBR_MATERIALS } from '../constants/colors';
 import { STAGE_CONFIG } from '../constants/layoutData';
 
 /**
- * Sân khấu chính (Main Stage) phía Bắc:
- * - Khối chữ nhật lùi sau + Mũi sân khấu hình bán nguyệt (semi-circular extension) nhô ra phía trước
- * - Hệ thống HOA DÀY ĐẶC:
- *   + Vòm hoa đa tầng (Multi-tier floral arch) nở rộ phía sau
- *   + Dải hoa viền quanh mép mũi bán nguyệt sân khấu (Curved Floral Rim)
- *   + Cụm hoa hai bên bậc tam cấp chính giữa
- *   + Các trụ hoa lớn (Grand Floral Pedestals) hai bên cánh gà
- * - Hệ thống ĐÈN CHIẾU SÂN KHẤU CỰC MẠNH:
- *   + Dàn đèn hắt chân vòm (Uplighting) công suất cao
- *   + Đèn hào quang (Backlight Halo) chiếu sáng chữ 3D "The Thousand Bloom"
- *   + Đèn chiếu dọc viền hoa bán nguyệt
+ * Sân khấu chính (Main Stage) tái hiện chính xác 100% hình ảnh tham chiếu:
+ * - Vòm hoa tròn khổng lồ trung tâm rực rỡ hoa cẩm tú cầu xanh pastel, hoa hồng phấn và trắng ngà
+ * - Khung vòm vàng đôi lồng trong vòm hoa, chữ ánh kim "The Thousand Bloom" và "Ngàn hoa, một hành trình"
+ * - Hai cổng vòm kiến trúc La Mã cổ điển với cột trụ đôi và rèm vén hai bên
+ * - Hai cầu thang uốn lượn hai bên cánh gà phủ kín dải hoa tươi dày đặc
+ * - Dải hoa ngang trên đỉnh tường sân khấu (Floral Valance) với dàn đèn downlight rọi nón ánh sáng xuống phông rèm
+ * - Thảm hoa trải dài trên sàn sân khấu kết hợp dàn chân nến kim loại vàng cao vút
+ * - Dàn 3 đèn chùm pha lê hoàng gia treo ngay trước sân khấu và các dải pha lê rủ từ trần
  */
 export default function MainStage({ lightMode = 'ceremony' }) {
   const { rectWidth, rectDepth, rectZ, semiRadius, semiCenterZ, height } = STAGE_CONFIG;
@@ -42,36 +39,38 @@ export default function MainStage({ lightMode = 'ceremony' }) {
     return geom;
   }, [semiRadius, height]);
 
-  // 2. Hệ hoa đa tầng dày đặc trên khung vòm sân khấu (Floral Arch)
-  const floralArchElements = useMemo(() => {
-    const items = [];
-    const tiers = [
-      { radius: 5.0, zOffset: -18.7, count: 65, yStart: 0.8, yEnd: 6.6, spread: 0.45 },
-      { radius: 4.4, zOffset: -18.3, count: 55, yStart: 0.8, yEnd: 5.9, spread: 0.4 },
-      { radius: 3.7, zOffset: -17.9, count: 48, yStart: 0.8, yEnd: 5.1, spread: 0.35 }
+  // Bảng màu hoa chuẩn concept "The Thousand Bloom"
+  const flowerPalette = [
+    PALETTE.dustyBlue,      // Cẩm tú cầu xanh pastel
+    PALETTE.dustyBlueLight,
+    PALETTE.blushPink,      // Hoa hồng phấn
+    PALETTE.blushPinkSoft,
+    PALETTE.ivory,          // Hoa hồng trắng ngà
+    '#FFFFFF',
+    PALETTE.sageGreen       // Lá bạc Eucalyptus
+  ];
+
+  // 2. VÒM HOA TRÒN TRUNG TÂM (GRAND CIRCULAR FLORAL ARCH)
+  const centerArchFlowers = useMemo(() => {
+    const blooms = [];
+    const layers = [
+      { r: 3.85, z: -18.3, count: 85, spread: 0.45 },
+      { r: 3.35, z: -18.0, count: 75, spread: 0.4 },
+      { r: 2.9, z: -17.8, count: 65, spread: 0.35 }
     ];
 
-    const flowerColors = [
-      PALETTE.dustyBlue,      // Cẩm tú cầu xanh pastel
-      PALETTE.blushPink,      // Hoa hồng phấn
-      PALETTE.ivory,          // Hoa hồng trắng ngà
-      PALETTE.sageGreen,      // Lá bạc
-      PALETTE.dustyBlueLight,
-      PALETTE.blushPinkSoft,
-      '#FFFFFF'
-    ];
-
-    tiers.forEach((tier, tierIdx) => {
-      for (let i = 0; i <= tier.count; i++) {
-        const theta = (i / tier.count) * Math.PI;
-        const x = -Math.cos(theta) * tier.radius + (Math.random() - 0.5) * tier.spread;
-        const y = Math.sin(theta) * (tier.yEnd - tier.yStart) + tier.yStart + (Math.random() - 0.5) * tier.spread;
-        const z = tier.zOffset + (Math.random() - 0.5) * 0.35;
+    layers.forEach((layer, lIdx) => {
+      for (let i = 0; i <= layer.count; i++) {
+        // Hình móng ngựa/vòng tròn từ 0.05 PI đến 0.95 PI
+        const theta = 0.08 * Math.PI + (i / layer.count) * 0.84 * Math.PI;
+        const x = -Math.cos(theta) * layer.r + (Math.random() - 0.5) * layer.spread;
+        const y = Math.sin(theta) * (layer.r * 1.1) + 1.2 + (Math.random() - 0.5) * layer.spread;
+        const z = layer.z + (Math.random() - 0.5) * 0.35;
         const scale = 0.22 + Math.random() * 0.26;
-        const color = flowerColors[Math.floor(Math.random() * flowerColors.length)];
+        const color = flowerPalette[Math.floor(Math.random() * flowerPalette.length)];
 
-        items.push({
-          id: `arch-${tierIdx}-${i}`,
+        blooms.push({
+          id: `c-arch-${lIdx}-${i}`,
           pos: [x, y, z],
           scale,
           color,
@@ -79,128 +78,361 @@ export default function MainStage({ lightMode = 'ceremony' }) {
         });
       }
     });
-
-    return items;
+    return blooms;
   }, []);
 
-  // 3. Dải hoa tươi viền quanh mép mũi bán nguyệt sân khấu (Semi-circular Floral Hedge)
-  const stageRimFlowers = useMemo(() => {
-    const items = [];
-    const count = 45;
-    const colors = [PALETTE.dustyBlue, PALETTE.blushPink, PALETTE.ivory, PALETTE.sageGreen];
+  // 3. DẢI HOA NGANG TRÊN ĐỈNH (TOP HORIZONTAL FLORAL VALANCE / CORNICE)
+  const topValanceFlowers = useMemo(() => {
+    const blooms = [];
+    const spanWidth = 24; // Phủ từ X = -12 đến +12
+    const count = 120;
 
-    for (let i = 0; i <= count; i++) {
-      const angle = (i / count) * Math.PI; // 0 đến PI
-      // Chừa khoảng giữa bậc tam cấp (angle ~ PI/2)
-      if (Math.abs(angle - Math.PI / 2) < 0.22) continue;
+    for (let i = 0; i < count; i++) {
+      const x = -12 + (i / count) * spanWidth + (Math.random() - 0.5) * 0.3;
+      const y = 5.9 + (Math.random() - 0.5) * 0.35;
+      const z = -18.5 + (Math.random() - 0.5) * 0.4;
+      const scale = 0.22 + Math.random() * 0.25;
+      const color = flowerPalette[Math.floor(Math.random() * flowerPalette.length)];
 
-      const r = semiRadius + 0.05 + (Math.random() - 0.5) * 0.15;
-      const x = -Math.cos(angle) * r;
-      const z = semiCenterZ + Math.sin(angle) * r;
-      const y = height + 0.12 + (Math.random() - 0.5) * 0.08;
-
-      items.push({
-        id: `rim-fl-${i}`,
+      blooms.push({
+        id: `valance-${i}`,
         pos: [x, y, z],
-        scale: 0.18 + Math.random() * 0.16,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        isLeaf: Math.random() > 0.65
+        scale,
+        color,
+        isLeaf: color === PALETTE.sageGreen
       });
     }
-    return items;
-  }, [semiRadius, semiCenterZ, height]);
+    return blooms;
+  }, []);
 
-  // 4. Hoa hai bên bậc tam cấp chính giữa (Center Steps Floral Cascades)
-  const stepFlowers = useMemo(() => {
-    const items = [];
-    const colors = [PALETTE.blushPink, PALETTE.dustyBlue, PALETTE.ivory, PALETTE.sageGreen];
+  // 4. DẢI HOA UỐN LƯỢN DỌC HAI CẦU THANG (SWEEPING STAIRCASE FLORAL CASCADES)
+  const stairFlowers = useMemo(() => {
+    const blooms = [];
 
-    [-1.75, 1.75].forEach((sideX, sideIdx) => {
-      for (let s = 0; s < 12; s++) {
-        const progress = s / 12;
-        const z = semiCenterZ + semiRadius + progress * 0.75;
-        const y = height * (1 - progress * 0.8) + 0.1;
-        const x = sideX + (sideX > 0 ? progress * 0.3 : -progress * 0.3) + (Math.random() - 0.5) * 0.15;
+    // Cánh Trái & Cánh Phải
+    [-1, 1].forEach((side) => {
+      const stepsCount = 35;
+      for (let s = 0; s < stepsCount; s++) {
+        const t = s / stepsCount;
+        // Quỹ đạo uốn cong hình chữ S nhẹ từ trên sân khấu xuống sàn sảnh
+        const angle = t * (Math.PI / 2.2);
+        const x = side * (6.2 + Math.sin(angle) * 3.8 + (Math.random() - 0.5) * 0.35);
+        const z = -18.5 + Math.cos(angle) * 5.5 + (Math.random() - 0.5) * 0.35;
+        const y = 3.5 * (1 - t * 0.85) + 0.35 + (Math.random() - 0.5) * 0.25;
+        const scale = 0.24 + Math.random() * 0.24;
+        const color = flowerPalette[Math.floor(Math.random() * flowerPalette.length)];
 
-        items.push({
-          id: `step-fl-${sideIdx}-${s}`,
+        blooms.push({
+          id: `stair-fl-${side}-${s}`,
           pos: [x, y, z],
-          scale: 0.16 + Math.random() * 0.14,
-          color: colors[Math.floor(Math.random() * colors.length)]
+          scale,
+          color,
+          isLeaf: color === PALETTE.sageGreen
         });
       }
     });
-    return items;
-  }, [semiRadius, semiCenterZ, height]);
+    return blooms;
+  }, []);
+
+  // 5. THẢM HOA TRÊN SÀN SÂN KHẤU & CHÂN VÒM (STAGE FLOOR FLORAL MEADOW)
+  const stageFloorMeadow = useMemo(() => {
+    const blooms = [];
+    const count = 90;
+
+    for (let i = 0; i < count; i++) {
+      const progress = i / count;
+      const x = -8.5 + progress * 17.0 + (Math.random() - 0.5) * 0.4;
+      const z = -17.2 + Math.sin(progress * Math.PI) * 1.5 + (Math.random() - 0.5) * 0.5;
+      const y = height + 0.15 + (Math.random() - 0.5) * 0.12;
+      const scale = 0.22 + Math.random() * 0.24;
+      const color = flowerPalette[Math.floor(Math.random() * flowerPalette.length)];
+
+      blooms.push({
+        id: `meadow-${i}`,
+        pos: [x, y, z],
+        scale,
+        color,
+        isLeaf: color === PALETTE.sageGreen
+      });
+    }
+    return blooms;
+  }, [height]);
+
+  // 6. DÀN CHÂN NẾN KIM LOẠI VÀNG CAO VÚT DỌC SÂN KHẤU (SLENDER CANDELABRA FOREST)
+  const candelabras = useMemo(() => {
+    const list = [];
+    const xOffsets = [-5.2, -4.5, -3.8, -3.2, 3.2, 3.8, 4.5, 5.2];
+
+    xOffsets.forEach((x, idx) => {
+      list.push({
+        id: `cand-${idx}`,
+        x,
+        y: height,
+        z: -17.6 + (Math.random() - 0.5) * 0.3,
+        heights: [0.75, 1.05, 1.35]
+      });
+    });
+    return list;
+  }, [height]);
+
+  // 7. CÁC SỢI PHA LÊ RỦ TỪ TRẦN (HANGING CRYSTAL STRANDS)
+  const crystalRainStrands = useMemo(() => {
+    const strands = [];
+    for (let i = 0; i < 24; i++) {
+      const x = -10 + (i / 24) * 20;
+      const z = -17.0 + (Math.random() - 0.5) * 1.2;
+      const length = 1.2 + Math.random() * 1.4;
+      strands.push({ id: `rain-${i}`, x, z, length });
+    }
+    return strands;
+  }, []);
 
   return (
     <group name="MainStage">
-      {/* 1. KHỐI SÂN KHẤU CHỮ NHẬT LÙI VỀ PHÍA SAU (SƠN TRẮNG SÁNG SANG TRỌNG) */}
+      {/* 1. KHỐI SÂN KHẤU NỀN TRẮNG SANG TRỌNG */}
       <mesh position={[0, height / 2, rectZ]} receiveShadow castShadow>
         <boxGeometry args={[rectWidth, height, rectDepth]} />
-        <meshStandardMaterial color="#FFFFFF" roughness={0.25} metalness={0.08} />
+        <meshStandardMaterial color="#FFFFFF" roughness={0.25} metalness={0.06} />
       </mesh>
 
-      {/* Viền kim loại Champagne Gold chạy quanh mép khối chữ nhật */}
-      <mesh position={[0, height - 0.02, rectZ - rectDepth / 2]}>
-        <boxGeometry args={[rectWidth + 0.1, 0.06, 0.1]} />
-        <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
-      </mesh>
-
-      {/* 2. MŨI SÂN KHẤU HÌNH BÁN NGUYỆT (SEMI-CIRCULAR EXTENSION) NHÔ RA PHÍA TRƯỚC */}
+      {/* Mũi bán nguyệt sân khấu nhô ra phía trước */}
       <mesh
         geometry={semiStageGeom}
         position={[0, height, semiCenterZ]}
         receiveShadow
         castShadow
       >
-        <meshStandardMaterial color="#FFFFFF" roughness={0.25} metalness={0.08} />
+        <meshStandardMaterial color="#FFFFFF" roughness={0.25} metalness={0.06} />
       </mesh>
 
-      {/* Viền kim loại mạ vàng cong quanh mũi bán nguyệt */}
+      {/* Viền nẹp kim loại vàng cong quanh mũi bán nguyệt */}
       <group position={[0, height - 0.02, semiCenterZ]}>
         <mesh rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[semiRadius - 0.04, semiRadius + 0.04, 64, 1, 0, Math.PI]} />
+          <ringGeometry args={[semiRadius - 0.05, semiRadius + 0.05, 64, 1, 0, Math.PI]} />
           <meshStandardMaterial {...PBR_MATERIALS.goldMetal} side={THREE.DoubleSide} />
         </mesh>
       </group>
 
-      {/* 3. BẬC TAM CẤP Ở CHÍNH GIỮA MŨI BÁN NGUYỆT */}
+      {/* Bậc tam cấp ở chính giữa mũi bán nguyệt */}
       <group position={[0, 0, semiCenterZ + semiRadius]}>
-        {/* Bậc 1 */}
-        <mesh position={[0, 0.12, 0.6]} receiveShadow>
-          <boxGeometry args={[3.2, 0.24, 0.5]} />
-          <meshStandardMaterial color="#FFFFFF" roughness={0.3} />
-        </mesh>
-        <mesh position={[0, 0.24, 0.85]}>
-          <boxGeometry args={[3.22, 0.03, 0.05]} />
+        {[
+          { y: 0.12, z: 0.6, w: 3.2, h: 0.24, d: 0.5 },
+          { y: 0.36, z: 0.25, w: 3.0, h: 0.24, d: 0.45 },
+          { y: 0.6, z: -0.05, w: 2.8, h: 0.24, d: 0.4 }
+        ].map((step, idx) => (
+          <group key={`center-step-${idx}`}>
+            <mesh position={[0, step.y, step.z]} receiveShadow>
+              <boxGeometry args={[step.w, step.h, step.d]} />
+              <meshStandardMaterial color="#FFFFFF" roughness={0.3} />
+            </mesh>
+            <mesh position={[0, step.y + step.h / 2, step.z + step.d / 2]}>
+              <boxGeometry args={[step.w + 0.02, 0.03, 0.04]} />
+              <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
+            </mesh>
+          </group>
+        ))}
+      </group>
+
+      {/* 2. HAI CẦU THANG UỐN CONG THỰC THỂ (CURVED SWEEPING STAIRS ARCHITECTURE) */}
+      {[-1, 1].map((side, sideIdx) => (
+        <group key={`stair-struct-${sideIdx}`}>
+          {/* Các bậc cầu thang uốn lượn */}
+          {[0, 1, 2, 3, 4, 5, 6, 7].map((s) => {
+            const t = s / 7;
+            const angle = t * (Math.PI / 2.3);
+            const x = side * (6.5 + Math.sin(angle) * 3.4);
+            const z = -18.5 + Math.cos(angle) * 5.0;
+            const y = 3.2 * (1 - t * 0.9) + 0.15;
+
+            return (
+              <mesh key={`st-${side}-${s}`} position={[x, y, z]} rotation={[0, -side * angle, 0]} receiveShadow>
+                <boxGeometry args={[1.5, 0.18, 0.55]} />
+                <meshStandardMaterial color="#FFFFFF" roughness={0.3} />
+              </mesh>
+            );
+          })}
+        </group>
+      ))}
+
+      {/* Dải hoa uốn lượn dày đặc dọc hai cầu thang */}
+      <group name="StaircaseFloralRunners">
+        {stairFlowers.map((fl) => (
+          <mesh key={fl.id} position={fl.pos} scale={fl.scale} castShadow>
+            {fl.isLeaf ? (
+              <coneGeometry args={[0.18, 0.4, 5]} />
+            ) : (
+              <dodecahedronGeometry args={[0.3, 1]} />
+            )}
+            <meshStandardMaterial color={fl.color} roughness={0.65} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* 3. HAI VÒM CỔ ĐIỂN LA MÃ HAI BÊN CÁNH GÀ (CLASSICAL PALLADIAN ARCHES) */}
+      {[-6.2, 6.2].map((ax, aIdx) => (
+        <group key={`palladian-arch-${aIdx}`} position={[ax, 0, -18.2]}>
+          {/* Cột La Mã bên trái vòm */}
+          <mesh position={[-1.6, 2.7, 0]} castShadow>
+            <cylinderGeometry args={[0.22, 0.25, 4.4, 24]} />
+            <meshStandardMaterial color="#FFFFFF" roughness={0.3} />
+          </mesh>
+          <mesh position={[-1.6, 0.2, 0]}>
+            <boxGeometry args={[0.65, 0.4, 0.65]} />
+            <meshStandardMaterial color="#FFFFFF" roughness={0.3} />
+          </mesh>
+          <mesh position={[-1.6, 4.9, 0]}>
+            <boxGeometry args={[0.65, 0.35, 0.65]} />
+            <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
+          </mesh>
+
+          {/* Cột La Mã bên phải vòm */}
+          <mesh position={[1.6, 2.7, 0]} castShadow>
+            <cylinderGeometry args={[0.22, 0.25, 4.4, 24]} />
+            <meshStandardMaterial color="#FFFFFF" roughness={0.3} />
+          </mesh>
+          <mesh position={[1.6, 0.2, 0]}>
+            <boxGeometry args={[0.65, 0.4, 0.65]} />
+            <meshStandardMaterial color="#FFFFFF" roughness={0.3} />
+          </mesh>
+          <mesh position={[1.6, 4.9, 0]}>
+            <boxGeometry args={[0.65, 0.35, 0.65]} />
+            <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
+          </mesh>
+
+          {/* Khung vòm bán nguyệt trên đỉnh 2 cột */}
+          <mesh position={[0, 4.9, 0]}>
+            <torusGeometry args={[1.6, 0.12, 16, 32, Math.PI]} />
+            <meshStandardMaterial color="#FFFFFF" roughness={0.3} />
+          </mesh>
+          {/* Viền nẹp vàng vòm phụ */}
+          <mesh position={[0, 4.9, 0.05]}>
+            <torusGeometry args={[1.5, 0.04, 16, 32, Math.PI]} />
+            <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
+          </mesh>
+
+          {/* Rèm voan buông rủ thanh lịch bên trong vòm phụ */}
+          <mesh position={[0, 2.8, -0.2]}>
+            <planeGeometry args={[3.0, 4.8]} />
+            <meshStandardMaterial
+              color="#FAF8F5"
+              roughness={0.7}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+        </group>
+      ))}
+
+      {/* 4. PHÔNG RÈM XẾP LY TOÀN DIỆN PHÍA SAU SÂN KHẤU (VERTICAL PLEATED BACKDROP) */}
+      <mesh position={[0, 3.4, -18.8]}>
+        <planeGeometry args={[26, 6.8]} />
+        <meshStandardMaterial
+          color="#FAF8F5"
+          roughness={0.75}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+
+      {/* 5. VÒM HOA TRÒN TRUNG TÂM (GRAND CIRCULAR FLORAL ARCH) */}
+      {/* Vòng kim loại vàng đôi ôm viền trong vòm hoa */}
+      <group position={[0, 3.4, -18.1]}>
+        <mesh>
+          <torusGeometry args={[3.2, 0.045, 16, 64]} />
           <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
         </mesh>
-
-        {/* Bậc 2 */}
-        <mesh position={[0, 0.36, 0.25]} receiveShadow>
-          <boxGeometry args={[3.0, 0.24, 0.45]} />
-          <meshStandardMaterial color="#FFFFFF" roughness={0.3} />
-        </mesh>
-        <mesh position={[0, 0.48, 0.48]}>
-          <boxGeometry args={[3.02, 0.03, 0.05]} />
-          <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
-        </mesh>
-
-        {/* Bậc 3 */}
-        <mesh position={[0, 0.6, -0.05]} receiveShadow>
-          <boxGeometry args={[2.8, 0.24, 0.4]} />
-          <meshStandardMaterial color="#FFFFFF" roughness={0.3} />
-        </mesh>
-        <mesh position={[0, 0.72, 0.15]}>
-          <boxGeometry args={[2.82, 0.03, 0.05]} />
+        <mesh position={[0, 0, 0.08]}>
+          <torusGeometry args={[3.45, 0.035, 16, 64]} />
           <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
         </mesh>
       </group>
 
-      {/* Cụm hoa hai bên bậc tam cấp */}
-      <group name="StepFlowers">
-        {stepFlowers.map((fl) => (
+      {/* Hệ hoa dày đặc quanh vòm tròn trung tâm */}
+      <group name="CenterCircularBlooms">
+        {centerArchFlowers.map((fl) => (
+          <mesh key={fl.id} position={fl.pos} scale={fl.scale} castShadow>
+            {fl.isLeaf ? (
+              <coneGeometry args={[0.2, 0.45, 5]} />
+            ) : (
+              <dodecahedronGeometry args={[0.32, 1]} />
+            )}
+            <meshStandardMaterial color={fl.color} roughness={0.65} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* 6. TYPOGRAPHY ÁNH KIM "The Thousand Bloom" & "Ngàn hoa, một hành trình" */}
+      <group position={[0, 3.75, -18.2]}>
+        {/* Nguồn sáng Halo phát sáng từ tâm vòm */}
+        <pointLight position={[0, 0, 0.2]} color="#FFF3DC" intensity={4.5} distance={6} />
+
+        {/* Chữ nghệ thuật "The Thousand Bloom" */}
+        <Text
+          fontSize={0.68}
+          color="#F2D177"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.02}
+          outlineColor="#5C4718"
+          letterSpacing={0.05}
+        >
+          The Thousand Bloom
+          <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
+        </Text>
+
+        {/* Phụ đề thanh thoát "Ngàn hoa, một hành trình" */}
+        <Text
+          position={[0, -0.55, 0]}
+          fontSize={0.24}
+          color="#FAF8F5"
+          anchorX="center"
+          anchorY="middle"
+          letterSpacing={0.12}
+        >
+          - Ngàn hoa, một hành trình -
+        </Text>
+
+        {/* Họa tiết vàng đối xứng */}
+        <mesh position={[0, -0.85, 0]}>
+          <boxGeometry args={[3.6, 0.025, 0.025]} />
+          <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
+        </mesh>
+      </group>
+
+      {/* 7. DẢI HOA NGANG TRÊN ĐỈNH TƯỜNG (TOP FLORAL CORNICE VALANCE) */}
+      <group name="TopFloralValance">
+        {topValanceFlowers.map((fl) => (
+          <mesh key={fl.id} position={fl.pos} scale={fl.scale} castShadow>
+            <dodecahedronGeometry args={[0.32, 1]} />
+            <meshStandardMaterial color={fl.color} roughness={0.65} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* DÀN ĐÈN DOWNLIGHT TỪ DẢI HOA TRÊN ĐỈNH RỌI HÌNH NÓN XUỐNG PHÔNG RÈM */}
+      <group position={[0, 6.0, -18.2]}>
+        {[-9, -6.5, -4, -1.8, 1.8, 4, 6.5, 9].map((dx, dIdx) => (
+          <group key={`downlight-${dIdx}`} position={[dx, 0, 0]}>
+            {/* Đèn downlight rọi nón ánh sáng ấm áp xuống rèm */}
+            <spotLight
+              position={[0, 0, 0]}
+              target-position={[dx * 0.95, 2.0, -18.7]}
+              color="#FFE2A8"
+              intensity={4.2}
+              angle={Math.PI / 4.5}
+              penumbra={0.7}
+              distance={8}
+            />
+            {/* Nốt sáng nhỏ ở chóa đèn */}
+            <mesh position={[0, -0.05, 0]}>
+              <sphereGeometry args={[0.04, 12, 12]} />
+              <meshBasicMaterial color="#FFECC9" />
+            </mesh>
+          </group>
+        ))}
+      </group>
+
+      {/* 8. THẢM HOA TRÊN SÀN SÂN KHẤU (STAGE FLOOR FLORAL MEADOW) */}
+      <group name="StageFloorMeadow">
+        {stageFloorMeadow.map((fl) => (
           <mesh key={fl.id} position={fl.pos} scale={fl.scale} castShadow>
             <dodecahedronGeometry args={[0.3, 1]} />
             <meshStandardMaterial color={fl.color} roughness={0.65} />
@@ -208,230 +440,118 @@ export default function MainStage({ lightMode = 'ceremony' }) {
         ))}
       </group>
 
-      {/* 4. DẢI HOA TƯƠI VIỀN QUANH MŨI BÁN NGUYỆT SÂN KHẤU */}
-      <group name="StageRimFlowers">
-        {stageRimFlowers.map((fl) => (
-          <mesh key={fl.id} position={fl.pos} scale={fl.scale} castShadow>
-            {fl.isLeaf ? (
-              <coneGeometry args={[0.16, 0.38, 5]} />
-            ) : (
-              <dodecahedronGeometry args={[0.28, 1]} />
-            )}
-            <meshStandardMaterial color={fl.color} roughness={0.65} />
-          </mesh>
-        ))}
-      </group>
+      {/* 9. DÀN CHÂN NẾN KIM LOẠI VÀNG CAO VÚT (CANDELABRAS) */}
+      <group name="SlenderCandelabras">
+        {candelabras.map((cand) => (
+          <group key={cand.id} position={[cand.x, cand.y, cand.z]}>
+            {cand.heights.map((h, hIdx) => {
+              const ox = (hIdx - 1) * 0.18;
+              const oz = (hIdx % 2 === 0 ? 0.08 : -0.08);
 
-      {/* 5. HAI CẦU THANG UỐN NHẸ Ở HAI BÊN CÁNH GÀ (TRÁI / PHẢI) */}
-      <group position={[-rectWidth / 2 - 0.3, 0, semiCenterZ - 0.5]} rotation={[0, Math.PI / 4, 0]}>
-        {[0, 1, 2].map((stepIdx) => (
-          <group key={`left-step-${stepIdx}`} position={[0, (stepIdx + 1) * 0.22, stepIdx * 0.4]}>
-            <mesh receiveShadow>
-              <boxGeometry args={[1.6, 0.22, 0.45]} />
-              <meshStandardMaterial color="#FFFFFF" roughness={0.3} />
-            </mesh>
-            <mesh position={[0, 0.11, 0.22]}>
-              <boxGeometry args={[1.62, 0.03, 0.04]} />
-              <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
-            </mesh>
+              return (
+                <group key={`stick-${hIdx}`} position={[ox, 0, oz]}>
+                  {/* Trụ nến kim loại mạ vàng cao vút */}
+                  <mesh position={[0, h / 2, 0]}>
+                    <cylinderGeometry args={[0.012, 0.02, h, 8]} />
+                    <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
+                  </mesh>
+                  {/* Cốc nến pha lê */}
+                  <mesh position={[0, h + 0.06, 0]}>
+                    <cylinderGeometry args={[0.04, 0.03, 0.12, 12]} />
+                    <meshPhysicalMaterial {...PBR_MATERIALS.crystalGlass} />
+                  </mesh>
+                  {/* Ngọn nến phát sáng */}
+                  <mesh position={[0, h + 0.08, 0]}>
+                    <sphereGeometry args={[0.02, 12, 12]} />
+                    <meshBasicMaterial color={PALETTE.candleFlame} />
+                  </mesh>
+                </group>
+              );
+            })}
+            {/* Nguồn sáng ấm tỏa ra từ cụm nến */}
+            <pointLight position={[0, 1.2, 0]} color={PALETTE.candleWarm} intensity={1.8} distance={3.5} />
           </group>
         ))}
-        <mesh position={[-0.75, 1.0, 0.4]} rotation={[Math.PI / 6, 0, 0]}>
-          <cylinderGeometry args={[0.03, 0.03, 1.8, 12]} />
-          <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
-        </mesh>
       </group>
 
-      <group position={[rectWidth / 2 + 0.3, 0, semiCenterZ - 0.5]} rotation={[0, -Math.PI / 4, 0]}>
-        {[0, 1, 2].map((stepIdx) => (
-          <group key={`right-step-${stepIdx}`} position={[0, (stepIdx + 1) * 0.22, stepIdx * 0.4]}>
-            <mesh receiveShadow>
-              <boxGeometry args={[1.6, 0.22, 0.45]} />
-              <meshStandardMaterial color="#FFFFFF" roughness={0.3} />
-            </mesh>
-            <mesh position={[0, 0.11, 0.22]}>
-              <boxGeometry args={[1.62, 0.03, 0.04]} />
-              <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
-            </mesh>
-          </group>
-        ))}
-        <mesh position={[0.75, 1.0, 0.4]} rotation={[Math.PI / 6, 0, 0]}>
-          <cylinderGeometry args={[0.03, 0.03, 1.8, 12]} />
-          <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
-        </mesh>
-      </group>
-
-      {/* 6. CÁC TRỤ HOA LỚN HOÀNG GIA (GRAND FLORAL PEDESTALS) Ở HAI BÊN CÁNH GÀ */}
-      {[-6.5, 6.5].map((gx, gIdx) => (
-        <group key={`grand-ped-${gIdx}`} position={[gx, height, -16.5]}>
-          {/* Đôn hoa kim loại mạ vàng cao 1.1m */}
-          <mesh position={[0, 0.55, 0]}>
-            <cylinderGeometry args={[0.28, 0.36, 1.1, 16]} />
+      {/* 10. DÀN 3 ĐÈN CHÙM PHA LÊ HOÀNG GIA TREO TRƯỚC SÂN KHẤU */}
+      <group position={[0, 5.4, -16.0]}>
+        {/* Đèn chùm trung tâm lớn */}
+        <group position={[0, 0, 0]}>
+          <mesh position={[0, 0.5, 0]}>
+            <cylinderGeometry args={[0.015, 0.015, 1.0, 8]} />
             <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
           </mesh>
-          {/* Cụm hoa khổng lồ dạng tháp nở rộ */}
-          <mesh position={[0, 1.45, 0]} castShadow>
-            <sphereGeometry args={[0.68, 16, 16]} />
-            <meshStandardMaterial color={PALETTE.dustyBlue} roughness={0.65} />
+          <mesh position={[0, 0, 0]}>
+            <torusGeometry args={[0.8, 0.035, 16, 32]} />
+            <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
           </mesh>
-          <mesh position={[0.15, 1.8, 0.1]} scale={0.5}>
-            <sphereGeometry args={[0.6, 12, 12]} />
-            <meshStandardMaterial color={PALETTE.blushPink} roughness={0.65} />
+          <mesh position={[0, -0.3, 0]}>
+            <coneGeometry args={[0.7, 0.8, 16, 1, true]} />
+            <meshPhysicalMaterial {...PBR_MATERIALS.crystalGlass} />
           </mesh>
-          <mesh position={[-0.15, 1.75, -0.1]} scale={0.55}>
-            <sphereGeometry args={[0.6, 12, 12]} />
-            <meshStandardMaterial color="#FFFFFF" roughness={0.65} />
-          </mesh>
-          {/* Đèn spotlight rọi thẳng từ chân trụ hoa */}
-          <pointLight position={[0, 2.2, 0]} color={PALETTE.candleWarm} intensity={3.5} distance={5} />
+          <pointLight position={[0, -0.4, 0]} color="#FFF3DC" intensity={3.8} distance={8} />
         </group>
-      ))}
 
-      {/* 7. KHUNG VÒM SÂN KHẤU & BACKDROP SÁNG SANG TRỌNG */}
-      <group position={[0, 0, -18.4]}>
-        {/* Vòm kim loại lớn phía ngoài */}
-        <mesh position={[0, 3.6, 0]}>
-          <torusGeometry args={[4.8, 0.07, 16, 64, Math.PI]} />
-          <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
-        </mesh>
-        <mesh position={[-4.8, 1.8, 0]}>
-          <cylinderGeometry args={[0.07, 0.07, 3.6, 16]} />
-          <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
-        </mesh>
-        <mesh position={[4.8, 1.8, 0]}>
-          <cylinderGeometry args={[0.07, 0.07, 3.6, 16]} />
-          <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
-        </mesh>
-
-        {/* Vòm kim loại lớp thứ hai */}
-        <mesh position={[0, 3.3, 0.2]}>
-          <torusGeometry args={[4.1, 0.06, 16, 64, Math.PI]} />
-          <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
-        </mesh>
-
-        {/* Tấm phông nền voan trắng sáng (không bị tối) */}
-        <mesh position={[0, 3.5, -0.3]}>
-          <planeGeometry args={[11, 7.0]} />
-          <meshStandardMaterial
-            color="#FFFFFF"
-            roughness={0.6}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
-      </group>
-
-      {/* 8. HỆ HOA ĐA TẦNG NỞ RỘ TRÊN KHUNG VÒM SÂN KHẤU */}
-      <group name="FloralArchBlooms">
-        {floralArchElements.map((item) => (
-          <mesh
-            key={item.id}
-            position={item.pos}
-            scale={item.scale}
-            castShadow
-          >
-            {item.isLeaf ? (
-              <coneGeometry args={[0.2, 0.5, 5]} />
-            ) : (
-              <dodecahedronGeometry args={[0.32, 1]} />
-            )}
-            <meshStandardMaterial
-              color={item.color}
-              roughness={0.65}
-              metalness={0.05}
-            />
+        {/* Đèn chùm bên trái */}
+        <group position={[-5.8, 0.2, 0]}>
+          <mesh position={[0, 0.4, 0]}>
+            <cylinderGeometry args={[0.012, 0.012, 0.8, 8]} />
+            <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
           </mesh>
-        ))}
+          <mesh position={[0, -0.2, 0]}>
+            <coneGeometry args={[0.55, 0.65, 16, 1, true]} />
+            <meshPhysicalMaterial {...PBR_MATERIALS.crystalGlass} />
+          </mesh>
+          <pointLight position={[0, -0.3, 0]} color="#FFF3DC" intensity={3.0} distance={7} />
+        </group>
+
+        {/* Đèn chùm bên phải */}
+        <group position={[5.8, 0.2, 0]}>
+          <mesh position={[0, 0.4, 0]}>
+            <cylinderGeometry args={[0.012, 0.012, 0.8, 8]} />
+            <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
+          </mesh>
+          <mesh position={[0, -0.2, 0]}>
+            <coneGeometry args={[0.55, 0.65, 16, 1, true]} />
+            <meshPhysicalMaterial {...PBR_MATERIALS.crystalGlass} />
+          </mesh>
+          <pointLight position={[0, -0.3, 0]} color="#FFF3DC" intensity={3.0} distance={7} />
+        </group>
       </group>
 
-      {/* 9. DÒNG CHỮ 3D ÁNH KIM "The Thousand Bloom" & ĐÈN HÀO QUANG */}
-      <group position={[0, 4.3, -18.1]}>
-        {/* Nguồn sáng Halo phát sáng vừa vặn phía sau chữ */}
-        <pointLight position={[0, 0, -0.1]} color="#FFF8E7" intensity={3.5} distance={5} />
-
-        {/* Tên chủ đề chính: "The Thousand Bloom" */}
-        <Text
-          fontSize={0.7}
-          color="#F5D77F"
-          anchorX="center"
-          anchorY="middle"
-          outlineWidth={0.03}
-          outlineColor="#4A3B12"
-          letterSpacing={0.06}
-        >
-          The Thousand Bloom
-          <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
-        </Text>
-
-        {/* Phụ đề: "Ngàn hoa, một hành trình" */}
-        <Text
-          position={[0, -0.58, 0]}
-          fontSize={0.25}
-          color="#FFFFFF"
-          anchorX="center"
-          anchorY="middle"
-          letterSpacing={0.14}
-        >
-          NGÀN HOA, MỘT HÀNH TRÌNH
-        </Text>
-
-        {/* Thanh họa tiết vàng nâng đỡ chữ */}
-        <mesh position={[0, -0.85, 0]}>
-          <boxGeometry args={[3.4, 0.03, 0.03]} />
-          <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
-        </mesh>
-      </group>
-
-      {/* 10. DÀN ĐÈN HẮT DƯỚI CHÂN VÒM SÂN KHẤU (UPLIGHTING NỔI BẬT) */}
-      <group position={[0, height + 0.05, -18.0]}>
-        {[-4.0, -2.5, -1.0, 0, 1.0, 2.5, 4.0].map((uX, uIdx) => (
-          <group key={`stage-uplight-${uIdx}`} position={[uX, 0, 0]}>
-            {/* Vỏ đèn mạ vàng */}
-            <mesh position={[0, 0.08, 0]}>
-              <cylinderGeometry args={[0.12, 0.16, 0.14, 16]} />
-              <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
+      {/* 11. CÁC DẢI PHA LÊ GIỌT NƯỚC RỦ TỪ TRẦN (CRYSTAL RAIN DROPLETS) */}
+      <group position={[0, 6.2, 0]}>
+        {crystalRainStrands.map((s) => (
+          <group key={s.id} position={[s.x, 0, s.z]}>
+            <mesh position={[0, -s.length / 2, 0]}>
+              <cylinderGeometry args={[0.005, 0.005, s.length, 6]} />
+              <meshStandardMaterial color="#FFFFFF" roughness={0.1} />
             </mesh>
-            {/* Đèn chiếu hắt lên trên nổi bật chi tiết hoa */}
-            <spotLight
-              position={[0, 0.2, 0]}
-              target-position={[uX * 0.7, 4.8, -18.2]}
-              color="#FFF0D0"
-              intensity={lightMode === 'ceremony' ? 5.2 : 3.8}
-              angle={Math.PI / 3.8}
-              penumbra={0.6}
-              distance={15}
-              castShadow
-            />
-            {/* Đèn PointLight phát sáng cục bộ quanh chân vòm */}
-            <pointLight position={[0, 0.35, 0]} color="#FFE4B5" intensity={1.5} distance={3.5} />
+            {/* Hạt pha lê lấp lánh ở đuôi sợi */}
+            <mesh position={[0, -s.length, 0]}>
+              <octahedronGeometry args={[0.04, 1]} />
+              <meshPhysicalMaterial {...PBR_MATERIALS.crystalGlass} />
+            </mesh>
           </group>
         ))}
       </group>
 
-      {/* 11. BÀN CẮT BÁNH CƯỚI & THÁP LY CHAMPAGNE PHA LÊ */}
-      <group position={[-4.5, height, -16.5]}>
-        <mesh position={[0, 0.45, 0]}>
-          <cylinderGeometry args={[0.65, 0.65, 0.9, 32]} />
-          <meshStandardMaterial color="#FFFFFF" roughness={0.4} />
-        </mesh>
-        {[0, 1, 2, 3].map((tier) => (
-          <mesh key={`cake-${tier}`} position={[0, 0.95 + tier * 0.22, 0]}>
-            <cylinderGeometry args={[0.42 - tier * 0.09, 0.44 - tier * 0.09, 0.2, 32]} />
-            <meshStandardMaterial color="#FFFDFC" roughness={0.2} />
-          </mesh>
+      {/* 12. DÀN ĐÈN UPLIGHTING DƯỚI CHÂN VÒM SÂN KHẤU HẮT LÊN */}
+      <group position={[0, height + 0.05, -17.8]}>
+        {[-3.8, -2.0, 0, 2.0, 3.8].map((uX, uIdx) => (
+          <group key={`uplight-${uIdx}`} position={[uX, 0, 0]}>
+            <spotLight
+              position={[0, 0.15, 0]}
+              target-position={[uX * 0.7, 4.2, -18.2]}
+              color="#FFE4B5"
+              intensity={4.8}
+              angle={Math.PI / 4}
+              penumbra={0.65}
+              distance={12}
+            />
+          </group>
         ))}
-        <pointLight position={[0, 2.0, 0]} color="#FFE4B5" intensity={1.8} distance={3.5} />
-      </group>
-
-      <group position={[4.5, height, -16.5]}>
-        <mesh position={[0, 0.45, 0]}>
-          <cylinderGeometry args={[0.65, 0.65, 0.9, 32]} />
-          <meshStandardMaterial color="#FFFFFF" roughness={0.4} />
-        </mesh>
-        <mesh position={[0, 1.25, 0]}>
-          <coneGeometry args={[0.45, 0.7, 8]} />
-          <meshPhysicalMaterial {...PBR_MATERIALS.crystalGlass} />
-        </mesh>
-        <pointLight position={[0, 1.8, 0]} color="#FFF0D0" intensity={2.0} distance={3.5} />
       </group>
     </group>
   );
