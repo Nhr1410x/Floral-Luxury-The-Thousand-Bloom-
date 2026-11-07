@@ -32,10 +32,10 @@ function ScreenshotCapture({ captureRef }) {
 }
 
 /**
- * 3D Canvas Scene tổng thể (Tone Màu Sáng Sang Trọng - Floral Luxury Light):
- * - Không gian sảnh tiệc bừng sáng, ấm áp, lộng lẫy
- * - Nền kiến trúc màu kem ngà (Ivory) thanh thoát
- * - Sân khấu rực sáng với dàn đèn công suất lớn
+ * 3D Canvas Scene tổng thể (Sáng Nổi Bật & Chiều Sâu Điện Ảnh):
+ * - Nền không gian tối nhẹ ấm áp, tạo độ tương phản cao (High Contrast)
+ * - Tôn vinh rực rỡ sân khấu chính, vòm hoa, lối đi thảm kem và đèn chùm pha lê
+ * - Hiệu ứng Bloom cân chỉnh chính xác, ánh nến lung linh không bị chói lóa
  */
 export default function Scene({
   activePresetId,
@@ -71,14 +71,14 @@ export default function Scene({
           onSelectTable(null);
         }}
       >
-        {/* Nền sảnh tiệc tone màu kem ngà sáng sang trọng (thay vì màu đen tối) */}
-        <color attach="background" args={['#F5F2EB']} />
-        <fog attach="fog" args={['#F5F2EB', 35, 95]} />
+        {/* Nền sảnh tiệc tone ấm có chiều sâu tương phản, giúp các điểm nhấn bừng sáng */}
+        <color attach="background" args={['#18151E']} />
+        <fog attach="fog" args={['#1E1A24', 28, 72]} />
 
         <Suspense fallback={null}>
           <ScreenshotCapture captureRef={captureRef} />
 
-          {/* Hệ thống ánh sáng thông minh tone sáng */}
+          {/* Hệ thống ánh sáng tương phản nổi bật */}
           <LightingController lightMode={lightMode} />
 
           {/* Quản lý camera & góc nhìn */}
@@ -90,10 +90,10 @@ export default function Scene({
             onTourEnd={onTourEnd}
           />
 
-          {/* 1. Không gian kiến trúc sảnh 30m x 40m x 8m & Rèm voan màu kem sáng */}
+          {/* 1. Không gian kiến trúc sảnh 30m x 40m x 8m */}
           <BallroomStructure />
 
-          {/* 2. Sân khấu chính rực rỡ hoa tươi & dàn đèn công suất cao */}
+          {/* 2. Sân khấu chính nổi bật hoa tươi & ánh sáng */}
           <MainStage lightMode={lightMode} />
 
           {/* 3. Thảm lối đi trung tâm & hoa tươi & nến thủy tinh */}
@@ -117,14 +117,14 @@ export default function Scene({
           {enableBloom && (
             <EffectComposer multisampling={4} disableNormalPass>
               <Bloom
-                luminanceThreshold={0.7}
-                luminanceSmoothing={0.6}
-                intensity={lightMode === 'ceremony' ? 1.1 : 0.75}
+                luminanceThreshold={0.62}
+                luminanceSmoothing={0.7}
+                intensity={lightMode === 'ceremony' ? 1.0 : 0.65}
                 mipmapBlur
               />
               <Vignette
-                offset={0.12}
-                darkness={0.25}
+                offset={0.16}
+                darkness={0.32}
                 eskil={false}
               />
             </EffectComposer>

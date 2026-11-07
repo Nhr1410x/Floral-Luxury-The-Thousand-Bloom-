@@ -29,7 +29,7 @@ export default function BallroomStructure() {
 
   return (
     <group name="BallroomStructure">
-      {/* 1. SÀN ĐÁ CẨM THẠCH TRẮNG SÁNG TRONG SẢNH TIỆC */}
+      {/* 1. SÀN ĐÁ CẨM THẠCH TRẮNG NGÀ TỰ NHIÊN */}
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, 0, 0]}
@@ -37,9 +37,9 @@ export default function BallroomStructure() {
       >
         <planeGeometry args={[width, length]} />
         <meshStandardMaterial
-          color="#FAF7F2"
-          roughness={0.2}
-          metalness={0.08}
+          color="#E6E0D4"
+          roughness={0.25}
+          metalness={0.06}
         />
       </mesh>
 
@@ -57,15 +57,15 @@ export default function BallroomStructure() {
         <meshStandardMaterial color={PALETTE.ivoryDark} roughness={0.3} />
       </mesh>
 
-      {/* 2. TRẦN NHÀ SẢNH TIỆC (CAO 8M, TONE TRẮNG SÁNG SANG TRỌNG) */}
+      {/* 2. TRẦN NHÀ SẢNH TIỆC (CAO 8M, TONE TRẦM HOÀNG GIA LÀM NỔI BẬT ĐÈN CHÙM) */}
       <mesh
         rotation={[Math.PI / 2, 0, 0]}
         position={[0, height, 0]}
       >
         <planeGeometry args={[width, length]} />
         <meshStandardMaterial
-          color="#F7F4EE"
-          roughness={0.6}
+          color="#24212B"
+          roughness={0.7}
         />
       </mesh>
 

@@ -345,8 +345,8 @@ export default function MainStage({ lightMode = 'ceremony' }) {
 
       {/* 9. DÒNG CHỮ 3D ÁNH KIM "The Thousand Bloom" & ĐÈN HÀO QUANG */}
       <group position={[0, 4.3, -18.1]}>
-        {/* Nguồn sáng Halo phát sáng trực tiếp phía sau chữ */}
-        <pointLight position={[0, 0, -0.1]} color="#FFF8E7" intensity={6.0} distance={5} />
+        {/* Nguồn sáng Halo phát sáng vừa vặn phía sau chữ */}
+        <pointLight position={[0, 0, -0.1]} color="#FFF8E7" intensity={3.5} distance={5} />
 
         {/* Tên chủ đề chính: "The Thousand Bloom" */}
         <Text
@@ -381,7 +381,7 @@ export default function MainStage({ lightMode = 'ceremony' }) {
         </mesh>
       </group>
 
-      {/* 10. DÀN ĐÈN HẮT CỰC MẠNH DƯỚI CHÂN VÒM SÂN KHẤU (UPLIGHTING) */}
+      {/* 10. DÀN ĐÈN HẮT DƯỚI CHÂN VÒM SÂN KHẤU (UPLIGHTING NỔI BẬT) */}
       <group position={[0, height + 0.05, -18.0]}>
         {[-4.0, -2.5, -1.0, 0, 1.0, 2.5, 4.0].map((uX, uIdx) => (
           <group key={`stage-uplight-${uIdx}`} position={[uX, 0, 0]}>
@@ -390,19 +390,19 @@ export default function MainStage({ lightMode = 'ceremony' }) {
               <cylinderGeometry args={[0.12, 0.16, 0.14, 16]} />
               <meshStandardMaterial {...PBR_MATERIALS.goldMetal} />
             </mesh>
-            {/* Đèn chiếu hắt lên trên với công suất cực mạnh */}
+            {/* Đèn chiếu hắt lên trên nổi bật chi tiết hoa */}
             <spotLight
               position={[0, 0.2, 0]}
               target-position={[uX * 0.7, 4.8, -18.2]}
               color="#FFF0D0"
-              intensity={lightMode === 'ceremony' ? 9.0 : 6.0}
+              intensity={lightMode === 'ceremony' ? 5.2 : 3.8}
               angle={Math.PI / 3.8}
               penumbra={0.6}
               distance={15}
               castShadow
             />
             {/* Đèn PointLight phát sáng cục bộ quanh chân vòm */}
-            <pointLight position={[0, 0.35, 0]} color="#FFE4B5" intensity={2.5} distance={4} />
+            <pointLight position={[0, 0.35, 0]} color="#FFE4B5" intensity={1.5} distance={3.5} />
           </group>
         ))}
       </group>
@@ -419,7 +419,7 @@ export default function MainStage({ lightMode = 'ceremony' }) {
             <meshStandardMaterial color="#FFFDFC" roughness={0.2} />
           </mesh>
         ))}
-        <pointLight position={[0, 2.0, 0]} color="#FFE4B5" intensity={3.0} distance={4} />
+        <pointLight position={[0, 2.0, 0]} color="#FFE4B5" intensity={1.8} distance={3.5} />
       </group>
 
       <group position={[4.5, height, -16.5]}>
@@ -431,7 +431,7 @@ export default function MainStage({ lightMode = 'ceremony' }) {
           <coneGeometry args={[0.45, 0.7, 8]} />
           <meshPhysicalMaterial {...PBR_MATERIALS.crystalGlass} />
         </mesh>
-        <pointLight position={[0, 1.8, 0]} color="#FFF0D0" intensity={3.5} distance={4} />
+        <pointLight position={[0, 1.8, 0]} color="#FFF0D0" intensity={2.0} distance={3.5} />
       </group>
     </group>
   );
