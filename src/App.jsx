@@ -8,7 +8,7 @@ import { TABLES_LIST } from './constants/layoutData';
 
 export default function App() {
   const [activePresetId, setActivePresetId] = useState('overview');
-  const [lightMode, setLightMode] = useState('ceremony'); // 'ceremony' | 'reception'
+  const [lightMode, setLightMode] = useState('ceremony');
   const [selectedTable, setSelectedTable] = useState(null);
   const [isAutoRotate, setIsAutoRotate] = useState(false);
   const [showTableNumbers, setShowTableNumbers] = useState(true);
@@ -17,15 +17,12 @@ export default function App() {
   const [isPromptGeneratorOpen, setIsPromptGeneratorOpen] = useState(false);
   const [isCinematicTour, setIsCinematicTour] = useState(false);
 
-  // Ref chụp ảnh màn hình WebGL
   const captureRef = useRef();
 
-  // Toggle lighting mode
   const handleToggleLightMode = () => {
     setLightMode((prev) => (prev === 'ceremony' ? 'reception' : 'ceremony'));
   };
 
-  // Chọn preset camera
   const handleSelectPreset = (presetId) => {
     setIsCinematicTour(false);
     setActivePresetId(presetId);
@@ -36,18 +33,15 @@ export default function App() {
     }
   };
 
-  // Chọn bàn tiệc
   const handleSelectTable = (table) => {
     setIsCinematicTour(false);
     setSelectedTable(table);
   };
 
-  // Toggle Cinematic Tour
   const handleToggleCinematicTour = () => {
     setIsCinematicTour((prev) => !prev);
   };
 
-  // Xử lý chụp ảnh màn hình
   const handleTakeScreenshot = () => {
     if (captureRef.current) {
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -56,7 +50,7 @@ export default function App() {
   };
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-[#100E14] font-sans">
+    <div className="relative w-screen h-screen overflow-hidden bg-[#F5F2EB] font-sans">
       {/* 3D WebGL Canvas Scene */}
       <Scene
         captureRef={captureRef}
@@ -107,7 +101,7 @@ export default function App() {
         onClose={() => setIsStyleGuideOpen(false)}
       />
 
-      {/* Modal Xuất Prompt Render 3D AI (Midjourney / Flux) */}
+      {/* Modal Xuất Prompt Render 3D AI */}
       <PromptGeneratorModal
         isOpen={isPromptGeneratorOpen}
         onClose={() => setIsPromptGeneratorOpen(false)}

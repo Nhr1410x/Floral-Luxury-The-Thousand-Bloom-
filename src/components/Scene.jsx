@@ -1,4 +1,4 @@
-import React, { Suspense, useImperativeHandle, forwardRef, useRef } from 'react';
+import React, { Suspense, useImperativeHandle } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import BallroomStructure from './BallroomStructure';
@@ -32,9 +32,10 @@ function ScreenshotCapture({ captureRef }) {
 }
 
 /**
- * 3D Canvas Scene tổng thể kết hợp PostProcessing & Chụp ảnh:
- * - Hệ thống Bloom làm lung linh ánh nến và đèn chùm pha lê
- * - Hỗ trợ chụp ảnh màn hình chất lượng cao trực tiếp từ WebGL
+ * 3D Canvas Scene tổng thể (Tone Màu Sáng Sang Trọng - Floral Luxury Light):
+ * - Không gian sảnh tiệc bừng sáng, ấm áp, lộng lẫy
+ * - Nền kiến trúc màu kem ngà (Ivory) thanh thoát
+ * - Sân khấu rực sáng với dàn đèn công suất lớn
  */
 export default function Scene({
   activePresetId,
@@ -64,20 +65,20 @@ export default function Scene({
           antialias: true,
           powerPreference: 'high-performance',
           alpha: false,
-          preserveDrawingBuffer: true // Giúp xuất ảnh màn hình rõ nét
+          preserveDrawingBuffer: true
         }}
         onPointerMissed={() => {
           onSelectTable(null);
         }}
       >
-        <color attach="background" args={['#100E14']} />
-        <fog attach="fog" args={['#1E1A22', 15, 60]} />
+        {/* Nền sảnh tiệc tone màu kem ngà sáng sang trọng (thay vì màu đen tối) */}
+        <color attach="background" args={['#F5F2EB']} />
+        <fog attach="fog" args={['#F5F2EB', 35, 95]} />
 
         <Suspense fallback={null}>
-          {/* Trình xuất ảnh Canvas */}
           <ScreenshotCapture captureRef={captureRef} />
 
-          {/* Hệ thống ánh sáng thông minh */}
+          {/* Hệ thống ánh sáng thông minh tone sáng */}
           <LightingController lightMode={lightMode} />
 
           {/* Quản lý camera & góc nhìn */}
@@ -89,10 +90,10 @@ export default function Scene({
             onTourEnd={onTourEnd}
           />
 
-          {/* 1. Không gian kiến trúc sảnh 30m x 40m x 8m & Rèm voan */}
+          {/* 1. Không gian kiến trúc sảnh 30m x 40m x 8m & Rèm voan màu kem sáng */}
           <BallroomStructure />
 
-          {/* 2. Sân khấu chính bán nguyệt & vòm hoa The Thousand Bloom */}
+          {/* 2. Sân khấu chính rực rỡ hoa tươi & dàn đèn công suất cao */}
           <MainStage lightMode={lightMode} />
 
           {/* 3. Thảm lối đi trung tâm & hoa tươi & nến thủy tinh */}
@@ -112,18 +113,18 @@ export default function Scene({
           {/* 6. Trần sảnh & Đèn chùm pha lê & Fairy lights */}
           <CeilingAndDecor lightMode={lightMode} />
 
-          {/* 7. Hiệu ứng hậu kỳ PostProcessing (Bloom lung linh) */}
+          {/* 7. Hiệu ứng hậu kỳ PostProcessing */}
           {enableBloom && (
             <EffectComposer multisampling={4} disableNormalPass>
               <Bloom
-                luminanceThreshold={0.55}
-                luminanceSmoothing={0.7}
-                intensity={lightMode === 'ceremony' ? 1.3 : 0.8}
+                luminanceThreshold={0.7}
+                luminanceSmoothing={0.6}
+                intensity={lightMode === 'ceremony' ? 1.1 : 0.75}
                 mipmapBlur
               />
               <Vignette
-                offset={0.2}
-                darkness={0.45}
+                offset={0.12}
+                darkness={0.25}
                 eskil={false}
               />
             </EffectComposer>
