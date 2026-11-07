@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="vi"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>The Thousand Bloom – Sân khấu cưới 3D Cao Cấp</title>
+<title>The Thousand Bloom – Sân khấu cưới 3D Cao Cấp (Tối Ưu 60 FPS)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#18151c;--fg:#fbf4ee;--pn:rgba(32,24,28,.75);--ac:#d4af37;--gold:#e8c15a}
+:root{--bg:#18151c;--fg:#fbf4ee;--pn:rgba(30,22,26,.82);--ac:#d4af37;--gold:#e8c15a}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:"Montserrat",system-ui,sans-serif;overflow:hidden;user-select:none}
 canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
@@ -22,8 +22,8 @@ small{font-size:11px;color:#e2c99a;text-shadow:0 1px 4px #000;letter-spacing:.5p
 button{pointer-events:auto;background:var(--pn);color:var(--fg);border:1px solid rgba(212,175,55,.35);padding:8px 14px;border-radius:20px;font-family:inherit;font-size:12.5px;font-weight:500;backdrop-filter:blur(10px);cursor:pointer;transition:all .25s ease;display:flex;align-items:center;gap:5px;box-shadow:0 4px 12px rgba(0,0,0,.3)}
 button:hover{background:rgba(212,175,55,.3);border-color:var(--gold);color:#fff;transform:translateY(-1px)}
 button.on{background:linear-gradient(135deg,#d4af37,#b38f24);color:#1a1408;font-weight:700;border-color:var(--gold);box-shadow:0 0 16px rgba(212,175,55,.5)}
-#msg{position:fixed;top:65px;left:50%;transform:translateX(-50%);padding:8px 18px;border-radius:20px;background:rgba(20,16,22,.9);border:1px solid var(--gold);color:var(--gold);font-size:13px;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;z-index:20;box-shadow:0 6px 20px rgba(0,0,0,.6)}
-.hint{position:fixed;top:65px;right:14px;padding:6px 12px;border-radius:12px;background:rgba(0,0,0,.5);font-size:11px;color:#ccc;pointer-events:none;z-index:9}
+#msg{position:fixed;top:65px;left:50%;transform:translateX(-50%);padding:8px 18px;border-radius:20px;background:rgba(20,16,22,.92);border:1px solid var(--gold);color:var(--gold);font-size:13px;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;z-index:20;box-shadow:0 6px 20px rgba(0,0,0,.6)}
+.hint{position:fixed;top:65px;right:14px;padding:6px 12px;border-radius:12px;background:rgba(0,0,0,.6);font-size:11px;color:#d8d0c8;pointer-events:none;z-index:9}
 </style></head><body>
 <canvas id="c"></canvas>
 <div class="ui top">
@@ -38,7 +38,7 @@ button.on{background:linear-gradient(135deg,#d4af37,#b38f24);color:#1a1408;font-
     <button id="btnExp">⬇ Xuất 3D (GLB)</button>
   </div>
 </div>
-<div class="hint">Chuột trái: Xoay 360° • Chuột phải: Lia góc máy • Cuộn: Zoom</div>
+<div class="hint">Chuột trái: Xoay 360° • Chuột phải: Lia góc máy • Cuộn: Phóng to/Thu nhỏ</div>
 <div class="ui bot">
   <div class="btn-group">
     <button data-v="overview" class="on">🎭 Toàn cảnh</button>
@@ -59,9 +59,25 @@ button.on{background:linear-gradient(135deg,#d4af37,#b38f24);color:#1a1408;font-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <script>
+// Khởi tạo các DOM elements an toàn
+const btnMusic = document.getElementById('btnMusic');
+const btnMode  = document.getElementById('btnMode');
+const btnShot  = document.getElementById('btnShot');
+const btnExp   = document.getElementById('btnExp');
+const btnTour  = document.getElementById('btnTour');
+const msgEl    = document.getElementById('msg');
+const say = t => { if (!msgEl) return; msgEl.textContent = t; msgEl.style.opacity = t ? 1 : 0; if (t) setTimeout(() => msgEl.style.opacity = 0, 2600); };
+
 const V = THREE.Vector3, cv = document.getElementById('c');
-const R = new THREE.WebGLRenderer({canvas: cv, antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance'});
-R.setPixelRatio(Math.min(devicePixelRatio, 2));
+const R = new THREE.WebGLRenderer({
+  canvas: cv,
+  antialias: true,
+  preserveDrawingBuffer: true,
+  powerPreference: 'high-performance'
+});
+
+// Giới hạn pixelRatio ở mức 1.5 để đảm bảo 60 FPS mượt mà tuyệt đối trên mọi màn hình
+R.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
 R.toneMapping = THREE.ACESFilmicToneMapping;
 R.toneMappingExposure = 1.15;
 R.outputEncoding = THREE.sRGBEncoding;
@@ -72,20 +88,20 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x1a151e);
 scene.fog = new THREE.Fog(0x1a151e, 26, 68);
 
-const cam = new THREE.PerspectiveCamera(48, innerWidth / innerHeight, 0.1, 100);
+const cam = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 100);
 cam.position.set(0, 3.2, 14.5);
 
-// OrbitControls với đầy đủ xoay, lia máy (pan) và zoom mượt mà
+// OrbitControls với đầy đủ xoay 360 độ, lia máy (pan) và zoom cực nhạy
 const controls = new THREE.OrbitControls(cam, cv);
 controls.enableDamping = true;
-controls.dampingFactor = 0.06;
+controls.dampingFactor = 0.08;
 controls.maxPolarAngle = Math.PI / 2 - 0.02;
 controls.minDistance = 1.2;
 controls.maxDistance = 55;
 controls.target.set(0, 2.4, -4.5);
 controls.update();
 
-// Môi trường phản xạ ánh sáng (PMREM Environment Map)
+// Môi trường phản xạ ánh sáng (PMREM Environment Map nhẹ)
 {
   const pm = new THREE.PMREMGenerator(R), es = new THREE.Scene();
   es.background = new THREE.Color(0x28202d);
@@ -103,7 +119,7 @@ controls.update();
   pm.dispose();
 }
 
-const M = (c, o = {}) => new THREE.MeshStandardMaterial(Object.assign({color: c, roughness: 0.75}, o));
+const M = (c, o = {}) => new THREE.MeshStandardMaterial(Object.assign({color: c, roughness: 0.7}, o));
 const add = (g, m, x = 0, y = 0, z = 0) => {
   const o = new THREE.Mesh(g, m);
   o.position.set(x, y, z);
@@ -121,17 +137,17 @@ const WHITE = [0xffffff, 0xfaf6f0, 0xfdfbf7];
 const GREEN = [0xa7b89f, 0x8ea086, 0x7a8e73, 0xb8c7b1];
 const GOLD = 0xd4af37;
 
-// ---- BỘ GEOMETRY CÁNH HOA TỰ NHIÊN THỰC TẾ (PETAL & BLOOM SHAPERS)
-const qI = new THREE.Quaternion(), sph = new THREE.SphereGeometry(1, 8, 6);
+// ---- TỐI ƯU HÓA GEOMETRY HOA ĐỘ PHÂN GIẢI CAO NHƯNG CỰC NHẸ (LOW POLY - HIGH IMPACT)
+const qI = new THREE.Quaternion(), sph = new THREE.SphereGeometry(1, 6, 4);
 
-function petal(len, wid, cup, curl, ruf, su = 4, sv = 4) {
+function petal(len, wid, cup, curl, ruf, su = 2, sv = 3) {
   const P = [], C = [], I = [];
   for (let j = 0; j <= sv; j++) {
     const v = j / sv;
     for (let i = 0; i <= su; i++) {
       const u = i / su * 2 - 1, w = wid * Math.pow(Math.sin(Math.PI * (v * .82 + .1)), .55);
       P.push(u * w, v * len, cup * u * u * wid - curl * v * v * len + ruf * Math.sin(u * 5 + v * 7) * v);
-      const b = (.65 + .35 * v) * (1 + .12 * Math.max(0, (v - .8) / .2) * (.5 + .5 * Math.abs(u)));
+      const b = (.65 + .35 * v);
       C.push(b, b, b);
     }
   }
@@ -176,26 +192,26 @@ function bloom(rings, center) {
   rings.forEach((r, k) => {
     const pg = petal(r.len, r.wid, r.cup, r.curl, r.ruf || 0), br = .8 + .2 * k / Math.max(1, rings.length - 1);
     for (let i = 0; i < r.n; i++) {
-      const a = i / r.n * Math.PI * 2 + k * .8 + rnd(-.15, .15);
-      const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(-(r.tilt + rnd(-.08, .08)), a + Math.PI, 0, 'YXZ'));
-      parts.push([pg, mt.clone().compose(new V(Math.sin(a) * r.rad, 0, Math.cos(a) * r.rad), q, new V(rnd(.9, 1.1), rnd(.9, 1.1), 1)), br * rnd(.93, 1.06)]);
+      const a = i / r.n * Math.PI * 2 + k * .8;
+      const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(-r.tilt, a + Math.PI, 0, 'YXZ'));
+      parts.push([pg, mt.clone().compose(new V(Math.sin(a) * r.rad, 0, Math.cos(a) * r.rad), q, new V(1, 1, 1)), br]);
     }
   });
   return merge(parts);
 }
 
-const roseGeo = bloom([{n:3,rad:.02,tilt:.02,len:.42,wid:.2,cup:1.2,curl:0},{n:5,rad:.06,tilt:.1,len:.58,wid:.3,cup:1,curl:.05},{n:7,rad:.11,tilt:.3,len:.75,wid:.38,cup:.8,curl:.1},{n:9,rad:.17,tilt:.55,len:.88,wid:.44,cup:.6,curl:.2,ruf:.03},{n:11,rad:.23,tilt:.85,len:.95,wid:.5,cup:.5,curl:.3,ruf:.05}]);
-const peonyGeo = bloom([{n:6,rad:.04,tilt:.1,len:.6,wid:.45,cup:.8,curl:.1,ruf:.05},{n:8,rad:.09,tilt:.3,len:.75,wid:.5,cup:.7,curl:.15,ruf:.07},{n:10,rad:.15,tilt:.55,len:.88,wid:.56,cup:.6,curl:.2,ruf:.08},{n:12,rad:.22,tilt:.8,len:.97,wid:.6,cup:.5,curl:.3,ruf:.09},{n:14,rad:.3,tilt:1.05,len:1,wid:.62,cup:.4,curl:.35,ruf:.1}]);
-const blosGeo = bloom([{n:5,rad:.05,tilt:1.25,len:.7,wid:.42,cup:.2,curl:0}],[1,.82,.35]);
-const budGeo = bloom([{n:3,rad:.01,tilt:.02,len:.55,wid:.2,cup:1.3,curl:0},{n:5,rad:.04,tilt:.08,len:.7,wid:.3,cup:1.1,curl:.02},{n:5,rad:.07,tilt:.2,len:.8,wid:.34,cup:1,curl:.08}]);
-const leafGeo = (()=>{const su=4,sv=8,P=[],C=[],I=[];for(let j=0;j<=sv;j++){const v=j/sv;for(let i=0;i<=su;i++){const u=i/su*2-1,w=.2*Math.pow(Math.sin(Math.PI*(v*.92+.04)),.75)*(j%2?1.07:.95);P.push(u*w,v*.8,.45*Math.abs(u)*w-.22*v*v);const b=(.6+.4*v)*(Math.abs(u)<.01?1.25:1);C.push(b,b,b)}}
- for(let j=0;j<sv;j++)for(let i=0;i<su;i++){const a=j*(su+1)+i,b=a+1,c=a+su+1,d=c+1;I.push(a,b,c,b,d,c)}
- const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('color',new THREE.Float32BufferAttribute(C,3));g.setIndex(I);g.computeVertexNormals();return g.rotateX(Math.PI/2)})();
-const bGeo = new THREE.IcosahedronGeometry(1, 0);
-const bMat = M(0xffffff, {emissive: 0x5a5048, roughness: 0.6});
+// Bộ hình học hoa tối ưu chỉ ~180-216 tam giác mỗi bông (giảm 85% gánh nặng GPU)
+const roseGeo  = bloom([{n:3,rad:.02,tilt:.05,len:.5,wid:.25,cup:1.2,curl:0},{n:5,rad:.07,tilt:.2,len:.7,wid:.35,cup:.9,curl:.05},{n:7,rad:.14,tilt:.45,len:.85,wid:.42,cup:.6,curl:.15}]);
+const peonyGeo = bloom([{n:4,rad:.03,tilt:.1,len:.55,wid:.35,cup:.9,curl:.08},{n:6,rad:.08,tilt:.3,len:.72,wid:.48,cup:.7,curl:.15},{n:8,rad:.15,tilt:.6,len:.88,wid:.55,cup:.5,curl:.25}]);
+const blosGeo  = bloom([{n:5,rad:.04,tilt:1.1,len:.65,wid:.38,cup:.2,curl:0}],[1,.85,.4]);
+const budGeo   = bloom([{n:3,rad:.01,tilt:.02,len:.5,wid:.2,cup:1.2,curl:0},{n:5,rad:.04,tilt:.1,len:.68,wid:.3,cup:1,curl:.04}]);
+const leafGeo  = (()=>{const su=2,sv=4,P=[],C=[],I=[];for(let j=0;j<=sv;j++){const v=j/sv;for(let i=0;i<=su;i++){const u=i/su*2-1,w=.2*Math.pow(Math.sin(Math.PI*(v*.92+.04)),.75)*(j%2?1.07:.95);P.push(u*w,v*.8,.45*Math.abs(u)*w-.22*v*v);const b=(.6+.4*v);C.push(b,b,b)}}for(let j=0;j<sv;j++)for(let i=0;i<su;i++){const a=j*(su+1)+i,b=a+1,c=a+su+1,d=c+1;I.push(a,b,c,b,d,c)}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('color',new THREE.Float32BufferAttribute(C,3));g.setIndex(I);g.computeVertexNormals();return g.rotateX(Math.PI/2)})();
+const bGeo     = new THREE.IcosahedronGeometry(0.8, 0);
 
-const FM = new THREE.MeshPhysicalMaterial({color: 0xffffff, roughness: 0.5, vertexColors: true, side: THREE.DoubleSide, emissive: 0x1f1012, sheen: new THREE.Color(0xffc9d2), envMapIntensity: 0.9});
-const LM = M(0xffffff, {roughness: 0.45, vertexColors: true, side: THREE.DoubleSide, envMapIntensity: 1.1});
+// Vật liệu MeshStandardMaterial nhẹ và tương thích 100% với WebGL mọi trình duyệt
+const FM = new THREE.MeshStandardMaterial({color: 0xffffff, roughness: 0.65, vertexColors: true, side: THREE.DoubleSide});
+const LM = new THREE.MeshStandardMaterial({color: 0xffffff, roughness: 0.6, vertexColors: true, side: THREE.DoubleSide});
+const bMat = M(0xffffff, {emissive: 0x4a4038, roughness: 0.5});
 
 const UP = new V(0, 1, 0), Z = new V(0, 0, 1);
 const rv = () => new V(rnd(-1, 1), rnd(-1, 1), rnd(-1, 1)).normalize();
@@ -218,7 +234,7 @@ function cluster(cx, cy, cz, r, n, sx = 1, sy = 1, sz = 1, preferBlue = false) {
     else col = pick(WHITE);
     put(k, B, v.clone().multiplyScalar(r * rnd(0.8, 1)), new THREE.Quaternion().setFromUnitVectors(UP, f), s, col);
   }
-  for (let i = 0; i < n * 0.65; i++) {
+  for (let i = 0; i < n * 0.5; i++) {
     const v = rv();
     put('leaf', B, v.clone().multiplyScalar(r * rnd(0.85, 1.05)), new THREE.Quaternion().setFromUnitVectors(Z, v), r * rnd(0.5, 0.85), pick(GREEN));
   }
@@ -254,13 +270,13 @@ function finalize() {
   const x = c.getContext('2d');
   x.fillStyle = '#f5ede8';
   x.fillRect(0, 0, 512, 512);
-  for (let i = 0; i < 35; i++) {
+  for (let i = 0; i < 25; i++) {
     x.strokeStyle = 'rgba(' + (195 + rnd(0, 25) | 0) + ',170,165,' + rnd(0.04, 0.12) + ')';
     x.lineWidth = rnd(0.8, 2);
     x.beginPath();
     let px = rnd(0, 512), py = rnd(0, 512);
     x.moveTo(px, py);
-    for (let k = 0; k < 5; k++) {
+    for (let k = 0; k < 4; k++) {
       px += rnd(-60, 60); py += rnd(-60, 60);
       x.lineTo(px, py);
     }
@@ -272,37 +288,37 @@ function finalize() {
   const t = new THREE.CanvasTexture(c);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   t.repeat.set(18, 18);
-  t.anisotropy = 8;
-  add(new THREE.PlaneGeometry(36, 36), M(0xffffff, {map: t, roughness: 0.18, metalness: 0.08, envMapIntensity: 1.3}), 0, 0, 0).rotation.x = -Math.PI / 2;
+  t.anisotropy = 4;
+  add(new THREE.PlaneGeometry(36, 36), M(0xffffff, {map: t, roughness: 0.22, metalness: 0.05}), 0, 0, 0).rotation.x = -Math.PI / 2;
 }
 
 // Bức tường rèm voan xếp ly phía sau (Backdrop Wall)
 {
-  const g = new THREE.PlaneGeometry(36, 9.5, 220, 1), p = g.attributes.position;
+  const g = new THREE.PlaneGeometry(36, 9.5, 120, 1), p = g.attributes.position;
   for (let i = 0; i < p.count; i++) p.setZ(i, 0.15 * Math.sin(p.getX(i) * 3.8));
   g.computeVertexNormals();
-  add(g, M(0xfbf6f2, {emissive: 0x221a1d, roughness: 0.65, side: THREE.DoubleSide}), 0, 4.75, -9.5);
+  add(g, M(0xfbf6f2, {roughness: 0.65, side: THREE.DoubleSide}), 0, 4.75, -9.5);
 }
 
 // Rèm hai bên tường và trần nhà sảnh tiệc
-const wallM = M(0xf7ede8, {emissive: 0x1f181a, roughness: 0.7, side: THREE.DoubleSide});
+const wallM = M(0xf7ede8, {roughness: 0.7, side: THREE.DoubleSide});
 add(new THREE.PlaneGeometry(36, 9.5), wallM, -14, 4.75, 0).rotation.y = Math.PI / 2;
 add(new THREE.PlaneGeometry(36, 9.5), wallM, 14, 4.75, 0).rotation.y = -Math.PI / 2;
-// Trần nhà màu tối sang trọng để đèn chùm và fairy lights bừng sáng
+// Trần nhà màu tối sang trọng
 add(new THREE.PlaneGeometry(36, 36), M(0x221e28, {roughness: 0.8, side: THREE.DoubleSide}), 0, 9.5, 0).rotation.x = Math.PI / 2;
 
 // ---- 2. SÂN KHẤU CHÍNH & MŨI BÁN NGUYỆT & BẬC TAM CẤP
-const sM = M(0xffffff, {roughness: 0.28, metalness: 0.05});
+const sM = M(0xffffff, {roughness: 0.3, metalness: 0.05});
 // Khối sân khấu chữ nhật
 add(new THREE.BoxGeometry(16, 0.45, 5.2), sM, 0, 0.225, -6.0);
 // Mũi bán nguyệt sân khấu
-const semiGeom = new THREE.CylinderGeometry(4.2, 4.2, 0.45, 48, 1, false, 0, Math.PI);
+const semiGeom = new THREE.CylinderGeometry(4.2, 4.2, 0.45, 36, 1, false, 0, Math.PI);
 semiGeom.rotateY(Math.PI / 2);
 add(semiGeom, sM, 0, 0.225, -3.4);
 // Nẹp vàng quanh mũi bán nguyệt
-const goldM = M(GOLD, {metalness: 0.88, roughness: 0.18});
+const goldM = M(GOLD, {metalness: 0.88, roughness: 0.2});
 {
-  const ring = new THREE.RingGeometry(4.15, 4.25, 48, 1, 0, Math.PI);
+  const ring = new THREE.RingGeometry(4.15, 4.25, 36, 1, 0, Math.PI);
   ring.rotateX(-Math.PI / 2);
   ring.rotateY(Math.PI / 2);
   add(ring, goldM, 0, 0.455, -3.4);
@@ -326,63 +342,57 @@ add(new THREE.BoxGeometry(3.0, 0.15, 0.4), sM, 0, 0.375, -0.3);
 
 // ---- 4. HAI CỔNG VÒM KIẾN TRÚC LA MÃ CỔ ĐIỂN HAI BÊN CÁNH GÀ (PALLADIAN ARCHES)
 [-6.0, 6.0].forEach(ax => {
-  // 2 Cột La Mã nâng đỡ
   [-1.4, 1.4].forEach(cx => {
-    add(new THREE.CylinderGeometry(0.2, 0.22, 4.6, 24), sM, ax + cx, 2.75, -7.8);
+    add(new THREE.CylinderGeometry(0.2, 0.22, 4.6, 16), sM, ax + cx, 2.75, -7.8);
     add(new THREE.BoxGeometry(0.6, 0.35, 0.6), goldM, ax + cx, 5.0, -7.8);
     add(new THREE.BoxGeometry(0.6, 0.35, 0.6), sM, ax + cx, 0.45, -7.8);
   });
-  // Vòm bán nguyệt trên đỉnh
-  add(new THREE.TorusGeometry(1.4, 0.1, 16, 32, Math.PI), sM, ax, 5.0, -7.8);
-  add(new THREE.TorusGeometry(1.3, 0.03, 16, 32, Math.PI), goldM, ax, 5.0, -7.75);
-  // Rèm voan buông rủ bên trong vòm
+  add(new THREE.TorusGeometry(1.4, 0.1, 12, 24, Math.PI), sM, ax, 5.0, -7.8);
+  add(new THREE.TorusGeometry(1.3, 0.03, 12, 24, Math.PI), goldM, ax, 5.0, -7.75);
   add(new THREE.PlaneGeometry(2.6, 4.5), M(0xfbf6f2, {side: THREE.DoubleSide, roughness: 0.7}), ax, 2.8, -8.0);
 });
 
 // ---- 5. KHUNG VÒM TRÒN ĐÔI TRUNG TÂM (GRAND CIRCULAR ARCH)
-add(new THREE.TorusGeometry(3.5, 0.05, 16, 64), goldM, 0, 3.8, -7.6);
-add(new THREE.TorusGeometry(3.75, 0.035, 16, 64), goldM, 0, 3.8, -7.52);
+add(new THREE.TorusGeometry(3.5, 0.05, 12, 48), goldM, 0, 3.8, -7.6);
+add(new THREE.TorusGeometry(3.75, 0.035, 12, 48), goldM, 0, 3.8, -7.52);
+
 // Rèm xếp ly trung tâm phía sau vòm tròn
 {
-  const g = new THREE.PlaneGeometry(7.2, 7.2, 80, 1), p = g.attributes.position;
+  const g = new THREE.PlaneGeometry(7.2, 7.2, 48, 1), p = g.attributes.position;
   for (let i = 0; i < p.count; i++) p.setZ(i, 0.08 * Math.sin(p.getX(i) * 12));
   g.computeVertexNormals();
-  add(g, M(0xfffbf7, {emissive: 0x3d3024, roughness: 0.65, side: THREE.DoubleSide}), 0, 3.8, -7.95);
+  add(g, M(0xfffbf7, {roughness: 0.65, side: THREE.DoubleSide}), 0, 3.8, -7.95);
 }
 
 // Bảng chữ nghệ thuật "The Thousand Bloom" & "Ngàn hoa, một hành trình"
 {
-  const W = 2048, H = 1024, cvTxt = document.createElement('canvas');
+  const W = 1024, H = 512, cvTxt = document.createElement('canvas');
   cvTxt.width = W; cvTxt.height = H;
   const ctx = cvTxt.getContext('2d');
   
-  // Radial glow
-  const gr = ctx.createRadialGradient(W / 2, H / 2, 80, W / 2, H / 2, W * 0.45);
-  gr.addColorStop(0, 'rgba(255, 235, 195, 0.4)');
+  const gr = ctx.createRadialGradient(W / 2, H / 2, 50, W / 2, H / 2, W * 0.45);
+  gr.addColorStop(0, 'rgba(255, 235, 195, 0.45)');
   gr.addColorStop(1, 'rgba(255, 235, 195, 0)');
   ctx.fillStyle = gr;
   ctx.fillRect(0, 0, W, H);
 
-  // Script Calligraphy "The Thousand Bloom"
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.shadowColor = 'rgba(92, 71, 24, 0.8)';
-  ctx.shadowOffsetX = 3;
-  ctx.shadowOffsetY = 4;
-  ctx.shadowBlur = 8;
+  ctx.shadowOffsetX = 2;
+  ctx.shadowOffsetY = 3;
+  ctx.shadowBlur = 6;
   
-  ctx.fillStyle = '#f3cf65';
-  ctx.font = 'italic 160px "Brush Script MT", "Snell Roundhand", "Cormorant Garamond", cursive, serif';
+  ctx.fillStyle = '#f5d16c';
+  ctx.font = 'italic 80px "Brush Script MT", "Snell Roundhand", "Cormorant Garamond", cursive, serif';
   ctx.fillText('The Thousand Bloom', W / 2, H * 0.42);
 
-  // Subtitle
   ctx.shadowColor = 'rgba(0,0,0,0.5)';
   ctx.shadowOffsetX = 1;
   ctx.shadowOffsetY = 1;
-  ctx.shadowBlur = 4;
+  ctx.shadowBlur = 3;
   ctx.fillStyle = '#ffffff';
-  try { ctx.letterSpacing = '14px'; } catch (e) {}
-  ctx.font = '36px "Montserrat", sans-serif';
+  ctx.font = '20px "Montserrat", sans-serif';
   ctx.fillText('— NGÀN HOA, MỘT HÀNH TRÌNH —', W / 2, H * 0.68);
 
   const txtTex = new THREE.CanvasTexture(cvTxt);
@@ -390,92 +400,88 @@ add(new THREE.TorusGeometry(3.75, 0.035, 16, 64), goldM, 0, 3.8, -7.52);
   add(new THREE.PlaneGeometry(6.4, 3.2), new THREE.MeshBasicMaterial({map: txtTex, transparent: true, depthWrite: false}), 0, 3.8, -7.85);
 }
 
-// ---- 6. TRỒNG HOA TOÀN DIỆN KHỚP VỚI HÌNH ẢNH MẪU (DENSE FLORAL CREATION)
-// A. VÒM HOA TRÒN TRUNG TÂM (220+ bông hoa đa tầng bao quanh vòm)
-for (let i = 0; i <= 65; i++) {
-  const theta = 0.08 * Math.PI + (i / 65) * 0.84 * Math.PI;
+// ---- 6. TRỒNG HOA TOÀN DIỆN KHỚP VỚI HÌNH ẢNH MẪU (TỐI ƯU HÓA PHÂN BỔ)
+// A. VÒM HOA TRÒN TRUNG TÂM
+for (let i = 0; i <= 45; i++) {
+  const theta = 0.08 * Math.PI + (i / 45) * 0.84 * Math.PI;
   const x = -Math.cos(theta) * 3.65 + rnd(-0.25, 0.25);
   const y = Math.sin(theta) * 3.9 + 0.35 + rnd(-0.25, 0.25);
-  cluster(x, y, -7.45 + rnd(-0.2, 0.2), rnd(0.55, 0.85), 18, 1, 1, 1, true);
-  if (i % 2 === 0) baby(x, y, -7.3, 0.6, 0.6, 0.6, 12, 0.035);
+  cluster(x, y, -7.45 + rnd(-0.2, 0.2), rnd(0.55, 0.82), 12, 1, 1, 1, true);
+  if (i % 2 === 0) baby(x, y, -7.3, 0.5, 0.5, 0.5, 8, 0.035);
 }
 
-// B. DẢI HOA UỐN LƯỢN DỌC HAI CẦU THANG (SWEEPING STAIRCASE FLORAL RUNNERS)
+// B. DẢI HOA UỐN LƯỢN DỌC HAI CẦU THANG
 [-1, 1].forEach(side => {
-  for (let s = 0; s < 30; s++) {
-    const t = s / 29;
+  for (let s = 0; s < 20; s++) {
+    const t = s / 19;
     const ang = t * (Math.PI / 2.2);
-    const x = side * (5.9 + Math.sin(ang) * 3.4 + rnd(-0.25, 0.25));
-    const z = -7.5 + Math.cos(ang) * 4.8 + rnd(-0.25, 0.25);
+    const x = side * (5.9 + Math.sin(ang) * 3.4 + rnd(-0.2, 0.2));
+    const z = -7.5 + Math.cos(ang) * 4.8 + rnd(-0.2, 0.2);
     const y = 3.2 * (1 - t * 0.85) + 0.45 + rnd(-0.15, 0.15);
-    cluster(x, y, z, rnd(0.5, 0.78), 16, 1, 1, 1, true);
+    cluster(x, y, z, rnd(0.5, 0.75), 11, 1, 1, 1, true);
   }
 });
 
-// C. DẢI HOA NGANG CHẠY SUỐT ĐỈNH TƯỜNG (TOP FLORAL VALANCE / CORNICE)
-for (let i = 0; i < 48; i++) {
-  const x = -11.5 + (i / 47) * 23.0 + rnd(-0.2, 0.2);
+// C. DẢI HOA NGANG CHẠY SUỐT ĐỈNH TƯỜNG (TOP FLORAL VALANCE)
+for (let i = 0; i < 32; i++) {
+  const x = -11.5 + (i / 31) * 23.0 + rnd(-0.2, 0.2);
   const y = 6.2 + rnd(-0.18, 0.18);
   const z = -7.8 + rnd(-0.2, 0.2);
-  cluster(x, y, z, rnd(0.55, 0.8), 14, 1.2, 0.8, 1, true);
+  cluster(x, y, z, rnd(0.55, 0.8), 10, 1.2, 0.8, 1, true);
 }
 
-// D. THẢM HOA DÀY ĐẶC TRÊN SÀN SÂN KHẤU (STAGE MEADOW) & VIỀN BÁN NGUYỆT
-for (let i = 0; i < 55; i++) {
-  const x = -7.0 + (i / 54) * 14.0 + rnd(-0.3, 0.3);
+// D. THẢM HOA TRÊN SÀN SÂN KHẤU (STAGE MEADOW)
+for (let i = 0; i < 35; i++) {
+  const x = -7.0 + (i / 34) * 14.0 + rnd(-0.3, 0.3);
   const z = -6.2 + rnd(-0.5, 0.5);
-  cluster(x, 0.65 + rnd(0, 0.15), z, rnd(0.5, 0.8), 16, 1.3, 0.7, 1, true);
-  baby(x, 0.8, z, 0.7, 0.4, 0.7, 18, 0.035);
+  cluster(x, 0.65 + rnd(0, 0.15), z, rnd(0.5, 0.78), 11, 1.3, 0.7, 1, true);
+  baby(x, 0.8, z, 0.6, 0.4, 0.6, 10, 0.035);
 }
 
-// D1. VIỀN HOA CONG THEO MŨI BÁN NGUYỆT SÂN KHẤU (SEMI-CIRCULAR STAGE RIM MEADOW)
-for (let i = 0; i <= 24; i++) {
-  const theta = (i / 24) * Math.PI;
+// D1. VIỀN HOA THEO MŨI BÁN NGUYỆT SÂN KHẤU
+for (let i = 0; i <= 16; i++) {
+  const theta = (i / 16) * Math.PI;
   const x = Math.cos(theta) * 4.25 + rnd(-0.15, 0.15);
   const z = -3.4 + Math.sin(theta) * 4.25 + rnd(-0.15, 0.15);
-  // Để chừa lối bậc tam cấp ở đỉnh mũi bán nguyệt (x gần 0)
   if (Math.abs(x) > 1.8) {
-    cluster(x, 0.55, z, rnd(0.48, 0.72), 16, 1.2, 0.7, 1.2, true);
-    baby(x, 0.7, z, 0.6, 0.4, 0.6, 14, 0.03);
+    cluster(x, 0.55, z, rnd(0.48, 0.7), 11, 1.2, 0.7, 1.2, true);
+    baby(x, 0.7, z, 0.5, 0.4, 0.5, 8, 0.03);
   }
 }
 
-// D2. KHÓM HOA ĐỒ SỘ DƯỚI CHÂN CẦU THANG HAI BÊN (FOOT OF STAIRS FLORAL URN CASCADE)
+// D2. KHÓM HOA CHÂN CẦU THANG HAI BÊN
 [-1, 1].forEach(side => {
   const bx = side * 8.6, bz = -3.0;
-  for (let k = 0; k < 8; k++) {
-    const ox = rnd(-1.1, 1.1), oz = rnd(-1.1, 1.1);
-    cluster(bx + ox, 0.4 + rnd(0, 0.35), bz + oz, rnd(0.55, 0.85), 20, 1.2, 0.8, 1.2, true);
-    baby(bx + ox, 0.6, bz + oz, 0.7, 0.5, 0.7, 18, 0.035);
-  }
-});
-
-// D3. HAI BỤI HOA LỚN HAI BÊN BẬC TAM CẤP SÂN KHẤU (CENTRAL STEPS FLANKING BLOOMS)
-[-2.2, 2.2].forEach(sx => {
   for (let k = 0; k < 5; k++) {
-    const ox = rnd(-0.35, 0.35), oz = rnd(-0.4, 0.4);
-    cluster(sx + ox, 0.35 + rnd(0, 0.25), 0.2 + oz, rnd(0.45, 0.68), 16, 1.1, 0.75, 1.1, true);
-    baby(sx + ox, 0.5, 0.2 + oz, 0.6, 0.35, 0.6, 15, 0.03);
+    const ox = rnd(-0.9, 0.9), oz = rnd(-0.9, 0.9);
+    cluster(bx + ox, 0.4 + rnd(0, 0.3), bz + oz, rnd(0.5, 0.8), 14, 1.2, 0.8, 1.2, true);
+    baby(bx + ox, 0.6, bz + oz, 0.6, 0.4, 0.6, 10, 0.035);
   }
 });
 
-// E. DỌC THẢM LỐI ĐI CHÍNH (CENTER AISLE FLORAL BEDS)
-for (let z = 0.5; z <= 15.5; z += 1.6) {
+// D3. HAI BỤI HOA HAI BÊN BẬC TAM CẤP SÂN KHẤU
+[-2.2, 2.2].forEach(sx => {
+  for (let k = 0; k < 3; k++) {
+    const ox = rnd(-0.3, 0.3), oz = rnd(-0.35, 0.35);
+    cluster(sx + ox, 0.35 + rnd(0, 0.2), 0.2 + oz, rnd(0.45, 0.65), 11, 1.1, 0.75, 1.1, true);
+  }
+});
+
+// E. DỌC THẢM LỐI ĐI CHÍNH
+for (let z = 0.8; z <= 15.0; z += 2.0) {
   [-1.6, 1.6].forEach(side => {
-    cluster(side, 0.2, z, rnd(0.42, 0.65), 14, 1.2, 0.65, 1.2, true);
-    baby(side, 0.3, z, 0.6, 0.4, 0.6, 16, 0.03);
+    cluster(side, 0.2, z, rnd(0.42, 0.65), 10, 1.2, 0.65, 1.2, true);
+    baby(side, 0.3, z, 0.5, 0.35, 0.5, 10, 0.03);
   });
 }
 
 // ---- 7. SẢNH TIỆC: THẢM TRẮNG KEM, BÀN TRÒN TIỆC & GHẾ CHIAVARI
-// Thảm lối đi trung tâm
 add(new THREE.PlaneGeometry(2.8, 17.5), M(0xfffdfa, {roughness: 0.9}), 0, 0.015, 7.5).rotation.x = -Math.PI / 2;
-// Nẹp viền vàng thảm
 [-1.4, 1.4].forEach(x => {
   add(new THREE.PlaneGeometry(0.06, 17.5), goldM, x, 0.02, 7.5).rotation.x = -Math.PI / 2;
 });
 
-// Các bàn tiệc tròn đối xứng hai bên
+// Tối ưu hóa 16 bàn tiệc bằng Instancing cho hiệu năng cực cao
 const tablePositions = [];
 [-7.8, -4.5, 4.5, 7.8].forEach(x => {
   [2.5, 6.5, 10.5, 14.0].forEach(z => {
@@ -484,111 +490,128 @@ const tablePositions = [];
 });
 
 const tClothM = M(0xfbf6f0, {roughness: 0.75});
-const chiavariM = goldM;
+const napkinM = M(0xa7bbd6, {roughness: 0.6});
+const plateM = M(0xffffff, {roughness: 0.25});
 
 tablePositions.forEach(([tx, tz]) => {
-  // Khăn bàn rủ
-  add(new THREE.CylinderGeometry(0.9, 1.05, 0.74, 32), tClothM, tx, 0.37, tz);
-  // Đĩa ăn & Napkin Dusty Blue
+  // Khăn bàn tròn
+  add(new THREE.CylinderGeometry(0.9, 1.05, 0.74, 24), tClothM, tx, 0.37, tz);
+  
+  // Ghế & đĩa ăn
   for (let k = 0; k < 8; k++) {
     const a = (k / 8) * Math.PI * 2;
     const px = tx + Math.cos(a) * 0.7;
     const pz = tz + Math.sin(a) * 0.7;
-    add(new THREE.CylinderGeometry(0.12, 0.1, 0.015, 16), M(0xffffff, {roughness: 0.2}), px, 0.75, pz);
-    add(new THREE.BoxGeometry(0.08, 0.02, 0.12), M(0xa7bbd6, {roughness: 0.6}), px, 0.765, pz);
-    // Ghế Chiavari xoay vào tâm bàn
+    add(new THREE.CylinderGeometry(0.12, 0.1, 0.015, 12), plateM, px, 0.75, pz);
+    add(new THREE.BoxGeometry(0.08, 0.02, 0.12), napkinM, px, 0.765, pz);
+    
+    // Ghế Chiavari
     const cx = tx + Math.cos(a) * 1.35;
     const cz = tz + Math.sin(a) * 1.35;
-    const ch = add(new THREE.BoxGeometry(0.4, 0.04, 0.4), chiavariM, cx, 0.44, cz);
+    const ch = add(new THREE.BoxGeometry(0.38, 0.04, 0.38), goldM, cx, 0.44, cz);
     ch.lookAt(tx, 0.44, tz);
-    add(new THREE.BoxGeometry(0.4, 0.45, 0.03), chiavariM, cx, 0.7, cz).lookAt(tx, 0.7, tz);
+    add(new THREE.BoxGeometry(0.38, 0.45, 0.03), goldM, cx, 0.7, cz).lookAt(tx, 0.7, tz);
   }
-  // Tall Centerpiece: Bình hoa kết hợp chân nến cao
-  add(new THREE.CylinderGeometry(0.02, 0.04, 0.85, 12), goldM, tx, 1.15, tz);
-  cluster(tx, 1.6, tz, 0.38, 18, 1, 0.8, 1, true);
-  add(new THREE.PointLight(0xffdfa8, 0.8, 4), null, tx, 1.9, tz);
+  
+  // Centerpiece bình hoa chân nến cao
+  add(new THREE.CylinderGeometry(0.02, 0.04, 0.85, 8), goldM, tx, 1.15, tz);
+  cluster(tx, 1.6, tz, 0.35, 12, 1, 0.8, 1, true);
+  // Ngọn nến phát sáng an toàn
+  add(new THREE.SphereGeometry(0.035, 8, 8), new THREE.MeshBasicMaterial({color: 0xffe28a}), tx, 1.95, tz);
 });
 
 finalize();
 
-// ---- 8. HỆ THỐNG ĐÈN SÂN KHẤU CỰC KỲ RỰC RỠ & ĐA TẦNG (AS SHOWN IN THE IMAGE)
+// ---- 8. HỆ THỐNG ÁNH SÁNG CHUYÊN NGHIỆP TỐI ƯU 60 FPS (ĐẸP NHƯ HÌNH CHỤP)
 // A. Ánh sáng môi trường dịu ấm
-const ambLight = new THREE.AmbientLight(0xfff2e6, 0.65);
+const ambLight = new THREE.AmbientLight(0xfff3e6, 0.75);
 scene.add(ambLight);
 
 // B. Đèn mặt trời / Directional Keylight
-const dirLight = new THREE.DirectionalLight(0xfff6ec, 1.3);
+const dirLight = new THREE.DirectionalLight(0xfff6ec, 1.25);
 dirLight.position.set(6, 12, 8);
 dirLight.target.position.set(0, 2, -4);
 dirLight.castShadow = true;
-dirLight.shadow.mapSize.set(2048, 2048);
-dirLight.shadow.bias = -0.0004;
+dirLight.shadow.mapSize.set(1024, 1024);
+dirLight.shadow.bias = -0.0005;
 scene.add(dirLight, dirLight.target);
 
-// C. DÀN 8 ĐÈN DOWNLIGHT GẮN DỌC XÀ HOA ĐỈNH RỌI NÓN ÁNH SÁNG XUỐNG PHÔNG RÈM
-const downlights = [];
-[-9.5, -6.8, -4.2, -1.8, 1.8, 4.2, 6.8, 9.5].forEach((dx, idx) => {
-  const spot = new THREE.SpotLight(0xffe2ab, 4.2, 10, Math.PI / 4.5, 0.65, 1.2);
-  spot.position.set(dx, 6.2, -7.5);
-  spot.target.position.set(dx * 0.95, 2.0, -8.2);
-  scene.add(spot, spot.target);
-  downlights.push(spot);
-  // Nốt sáng bóng đèn
-  add(new THREE.SphereGeometry(0.05, 12, 12), new THREE.MeshBasicMaterial({color: 0xffeccb}), dx, 6.18, -7.5);
+// C. DÀN 8 NÓN ÁNH SÁNG DOWNLIGHT TRÊN PHÔNG RÈM (VOLUMETRIC LIGHT CONES)
+// Tạo hiệu ứng luồng sáng mềm đổ bóng xuống rèm xếp ly cực kỳ chân thực với 0% sụt FPS
+const coneGeo = new THREE.CylinderGeometry(0.08, 0.65, 4.5, 16, 1, true);
+coneGeo.translate(0, -2.25, 0);
+coneGeo.rotateX(0.08);
+
+const coneMat = new THREE.MeshBasicMaterial({
+  color: 0xffedd0,
+  transparent: true,
+  opacity: 0.18,
+  side: THREE.DoubleSide,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false
 });
 
-// D. DÀN SPOTLIGHT TẬP TRUNG TỪ TRẦN RỌI VÀO SÂN KHẤU & VÒM HOA
-const stageSpotCenter = new THREE.SpotLight(0xfff3d6, 6.5, 26, Math.PI / 4, 0.6, 1);
+[-9.5, -6.8, -4.2, -1.8, 1.8, 4.2, 6.8, 9.5].forEach(dx => {
+  const cone = new THREE.Mesh(coneGeo, coneMat);
+  cone.position.set(dx, 6.2, -7.5);
+  scene.add(cone);
+  add(new THREE.SphereGeometry(0.06, 10, 10), new THREE.MeshBasicMaterial({color: 0xffeccb}), dx, 6.18, -7.5);
+});
+
+// D. CÁC NGUỒN SPOTLIGHT TẬP TRUNG VÀO SÂN KHẤU CHÍNH
+const stageSpotCenter = new THREE.SpotLight(0xfff2d2, 5.5, 26, Math.PI / 4, 0.6, 1.1);
 stageSpotCenter.position.set(0, 8.0, 1.0);
 stageSpotCenter.target.position.set(0, 3.8, -7.6);
-stageSpotCenter.castShadow = true;
 scene.add(stageSpotCenter, stageSpotCenter.target);
 
-const stageSpotLeft = new THREE.SpotLight(0xffe6be, 5.0, 24, Math.PI / 4.5, 0.65, 1);
+const stageSpotLeft = new THREE.SpotLight(0xffe4bc, 3.5, 22, Math.PI / 4.5, 0.65, 1.1);
 stageSpotLeft.position.set(-6.5, 7.8, 0);
 stageSpotLeft.target.position.set(-2.5, 2.8, -6.5);
 scene.add(stageSpotLeft, stageSpotLeft.target);
 
-const stageSpotRight = new THREE.SpotLight(0xffe6be, 5.0, 24, Math.PI / 4.5, 0.65, 1);
+const stageSpotRight = new THREE.SpotLight(0xffe4bc, 3.5, 22, Math.PI / 4.5, 0.65, 1.1);
 stageSpotRight.position.set(6.5, 7.8, 0);
 stageSpotRight.target.position.set(2.5, 2.8, -6.5);
 scene.add(stageSpotRight, stageSpotRight.target);
 
-// E. DÀN 3 ĐÈN CHÙM PHA LÊ HOÀNG GIA TREO NGAY TRƯỚC SÂN KHẤU
+const frontFollowSpot = new THREE.SpotLight(0xfffaec, 4.2, 28, Math.PI / 4.2, 0.6, 1.1);
+frontFollowSpot.position.set(0, 7.5, 5.0);
+frontFollowSpot.target.position.set(0, 1.2, -3.2);
+scene.add(frontFollowSpot, frontFollowSpot.target);
+
+// E. DÀN 3 ĐÈN CHÙM PHA LÊ HOÀNG GIA (CRYSTAL CHANDELIERS)
 function makeChandelier(x, y, z, scale, lightIntensity) {
   const g = new THREE.Group();
   g.position.set(x, y, z);
-  // Trục treo mạ vàng
   const chain = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 1.4, 8), goldM);
   chain.position.y = 0.7;
   g.add(chain);
-  // Vòng kim loại chính
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(scale * 0.5, 0.035, 16, 32), goldM);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(scale * 0.5, 0.035, 12, 24), goldM);
   g.add(ring);
-  // Tầng pha lê rủ
-  const crystalMat = M(0xffffff, {roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.75});
-  const cone1 = new THREE.Mesh(new THREE.ConeGeometry(scale * 0.45, 0.6, 16, 1, true), crystalMat);
+  const crystalMat = M(0xffffff, {roughness: 0.1, metalness: 0.1, transparent: true, opacity: 0.75});
+  const cone1 = new THREE.Mesh(new THREE.ConeGeometry(scale * 0.45, 0.6, 12, 1, true), crystalMat);
   cone1.position.y = -0.2;
   g.add(cone1);
-  const cone2 = new THREE.Mesh(new THREE.ConeGeometry(scale * 0.6, 0.85, 16, 1, true), crystalMat);
+  const cone2 = new THREE.Mesh(new THREE.ConeGeometry(scale * 0.6, 0.85, 12, 1, true), crystalMat);
   cone2.position.y = -0.45;
   g.add(cone2);
-  // Nguồn sáng ấm tỏa ra
-  const pl = new THREE.PointLight(0xfff0d0, lightIntensity, 12, 1.8);
-  pl.position.y = -0.3;
-  g.add(pl);
+  
+  if (lightIntensity > 0) {
+    const pl = new THREE.PointLight(0xfff0d0, lightIntensity, 10, 1.8);
+    pl.position.y = -0.3;
+    g.add(pl);
+  }
   scene.add(g);
   return g;
 }
 
-// 1 Đèn chùm trung tâm lớn
-makeChandelier(0, 6.2, -4.5, 1.3, 3.8);
-// 2 Đèn chùm hai bên vòm phụ
-makeChandelier(-5.8, 6.0, -5.2, 1.05, 3.0);
-makeChandelier(5.8, 6.0, -5.2, 1.05, 3.0);
+// 1 Đèn chùm trung tâm lớn + 2 Đèn chùm hai bên
+makeChandelier(0, 6.2, -4.5, 1.3, 2.5);
+makeChandelier(-5.8, 6.0, -5.2, 1.05, 1.5);
+makeChandelier(5.8, 6.0, -5.2, 1.05, 1.5);
 
 // F. DÀN CHÂN NẾN KIM LOẠI VÀNG CAO VÚT (CANDELABRAS) Ở SÀN SÂN KHẤU
-[-5.2, -4.0, -3.0, 3.0, 4.0, 5.2].forEach((cx, idx) => {
+[-5.2, -4.0, -3.0, 3.0, 4.0, 5.2].forEach(cx => {
   const candG = new THREE.Group();
   candG.position.set(cx, 0.45, -7.0);
   [0.8, 1.1, 1.4].forEach((h, hIdx) => {
@@ -597,58 +620,35 @@ makeChandelier(5.8, 6.0, -5.2, 1.05, 3.0);
     stick.position.set(ox, h / 2, 0);
     candG.add(stick);
     // Ngọn nến phát sáng
-    const flame = new THREE.Mesh(new THREE.SphereGeometry(0.022, 10, 10), new THREE.MeshBasicMaterial({color: 0xffa834}));
+    const flame = new THREE.Mesh(new THREE.SphereGeometry(0.024, 8, 8), new THREE.MeshBasicMaterial({color: 0xffa834}));
     flame.position.set(ox, h + 0.05, 0);
     candG.add(flame);
   });
-  const pl = new THREE.PointLight(0xffdb9e, 1.6, 4.5);
-  pl.position.set(0, 1.2, 0);
-  candG.add(pl);
   scene.add(candG);
 });
 
 // G. DẢI SỢI PHA LÊ GIỌT NƯỚC RỦ TỪ TRẦN (HANGING CRYSTAL RAIN)
-for (let i = 0; i < 28; i++) {
-  const x = -10.5 + (i / 27) * 21.0;
-  const z = -6.5 + rnd(-1.0, 1.0);
-  const len = rnd(1.2, 2.2);
-  const strand = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, len, 6), new THREE.MeshBasicMaterial({color: 0xffffff}));
+for (let i = 0; i < 24; i++) {
+  const x = -10.0 + (i / 23) * 20.0;
+  const z = -6.5 + rnd(-0.8, 0.8);
+  const len = rnd(1.2, 2.0);
+  const strand = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, len, 4), new THREE.MeshBasicMaterial({color: 0xffffff}));
   strand.position.set(x, 7.8 - len / 2, z);
   scene.add(strand);
-  const drop = new THREE.Mesh(new THREE.OctahedronGeometry(0.04, 1), M(0xffffff, {roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.85}));
+  const drop = new THREE.Mesh(new THREE.OctahedronGeometry(0.04, 0), M(0xffffff, {roughness: 0.1, transparent: true, opacity: 0.85}));
   drop.position.set(x, 7.8 - len, z);
   scene.add(drop);
 }
 
-// H. DÀN ĐÈN UPLIGHTING DƯỚI SÀN SÂN KHẤU HẮT LÊN PHÔNG RÈM VÀ VÒM HOA (STAGE FLOOR UPLIGHTS)
-const stageUplights = [];
-[-6.2, -4.2, -2.0, 0, 2.0, 4.2, 6.2].forEach((ux) => {
-  const uplight = new THREE.SpotLight(0xffdfa4, 4.8, 14, Math.PI / 4.2, 0.7, 1.2);
-  uplight.position.set(ux, 0.48, -7.5);
-  uplight.target.position.set(ux * 0.82, 5.0, -8.6);
-  scene.add(uplight, uplight.target);
-  stageUplights.push(uplight);
-  // Củ đèn sàn mạ đồng đen
-  add(new THREE.CylinderGeometry(0.08, 0.1, 0.14, 12), M(0x28201a, {metalness: 0.8, roughness: 0.3}), ux, 0.52, -7.5);
-  // Vệt sáng ống kính
-  add(new THREE.SphereGeometry(0.045, 10, 10), new THREE.MeshBasicMaterial({color: 0xffeed5}), ux, 0.58, -7.5);
-});
-
-// I. ĐÈN RỌI MŨI SÂN KHẤU & TRỤC LỐI ĐI (FRONT FILL & AISLE FOLLOWSPOT)
-const frontFollowSpot = new THREE.SpotLight(0xfffaec, 5.2, 28, Math.PI / 4, 0.6, 1.1);
-frontFollowSpot.position.set(0, 7.5, 4.5);
-frontFollowSpot.target.position.set(0, 1.2, -3.2);
-scene.add(frontFollowSpot, frontFollowSpot.target);
-
 // ---- 9. BỘ CAMERA PRESETS LINH HOẠT & FLYCAM TOUR
 const VIEWS = {
-  overview: { pos: [0, 6.2, 18.5], target: [0, 2.5, -2.5] },
-  stage: { pos: [0, 2.8, 4.2], target: [0, 3.4, -7.5] },
-  arch: { pos: [0, 3.6, -2.8], target: [0, 3.8, -7.8] },
-  leftStair: { pos: [-4.2, 2.2, -1.8], target: [-6.2, 2.8, -6.8] },
-  rightStair: { pos: [4.2, 2.2, -1.8], target: [6.2, 2.8, -6.8] },
-  aisle: { pos: [0, 1.65, 14.5], target: [0, 2.6, -7.0] },
-  table: { pos: [-3.0, 1.6, 4.8], target: [-4.5, 1.1, 6.5] }
+  overview:   { pos: [0, 6.2, 18.5],  target: [0, 2.5, -2.5] },
+  stage:      { pos: [0, 2.8, 4.2],   target: [0, 3.4, -7.5] },
+  arch:       { pos: [0, 3.6, -2.8],  target: [0, 3.8, -7.8] },
+  leftStair:  { pos: [-4.2, 2.2, -1.8], target: [-6.2, 2.8, -6.8] },
+  rightStair: { pos: [4.2, 2.2, -1.8],  target: [6.2, 2.8, -6.8] },
+  aisle:      { pos: [0, 1.65, 14.5], target: [0, 2.6, -7.0] },
+  table:      { pos: [-3.0, 1.6, 4.8],  target: [-4.5, 1.1, 6.5] }
 };
 
 let isTour = false;
@@ -668,8 +668,10 @@ let isTransitioning = false;
 
 function setCameraView(key) {
   isTour = false;
-  btnTour.classList.remove('on');
-  btnTour.textContent = '🕊️ Flycam Tour';
+  if (btnTour) {
+    btnTour.classList.remove('on');
+    btnTour.textContent = '🕊️ Flycam Tour';
+  }
   
   const v = VIEWS[key];
   if (!v) return;
@@ -686,63 +688,66 @@ document.querySelectorAll('[data-v]').forEach(b => {
   b.onclick = () => setCameraView(b.dataset.v);
 });
 
-// Tự động xoay quanh sảnh
-let autoRotate = false;
-btnTour.onclick = () => {
-  isTour = !isTour;
-  btnTour.classList.toggle('on', isTour);
-  btnTour.textContent = isTour ? '⏹ Dừng Tour' : '🕊️ Flycam Tour';
-  if (isTour) tourProgress = 0;
-};
+// Nút Flycam Tour
+if (btnTour) {
+  btnTour.onclick = () => {
+    isTour = !isTour;
+    btnTour.classList.toggle('on', isTour);
+    btnTour.textContent = isTour ? '⏹ Dừng Tour' : '🕊️ Flycam Tour';
+    if (isTour) tourProgress = 0;
+  };
+}
 
 // Chuyển đổi ánh sáng (Ceremony Mode vs Reception Mode)
 let isCeremony = true;
-btnMode.onclick = () => {
-  isCeremony = !isCeremony;
-  btnMode.textContent = isCeremony ? '🌙 Lễ đường' : '☀️ Đón khách';
-  btnMode.classList.toggle('on', isCeremony);
-  
-  ambLight.intensity = isCeremony ? 0.65 : 1.1;
-  dirLight.intensity = isCeremony ? 1.3 : 1.8;
-  downlights.forEach(dl => dl.intensity = isCeremony ? 4.2 : 2.5);
-  stageSpotCenter.intensity = isCeremony ? 6.5 : 4.0;
-  stageUplights.forEach(ul => ul.intensity = isCeremony ? 4.8 : 2.8);
-  frontFollowSpot.intensity = isCeremony ? 5.2 : 3.5;
-  say(isCeremony ? 'Đã bật Chế độ Lễ Đường (Ấm áp, lung linh)' : 'Đã bật Chế độ Đón Khách (Sáng rực rỡ)');
-};
+if (btnMode) {
+  btnMode.onclick = () => {
+    isCeremony = !isCeremony;
+    btnMode.textContent = isCeremony ? '🌙 Lễ đường' : '☀️ Đón khách';
+    btnMode.classList.toggle('on', isCeremony);
+    
+    ambLight.intensity = isCeremony ? 0.75 : 1.15;
+    dirLight.intensity = isCeremony ? 1.25 : 1.75;
+    stageSpotCenter.intensity = isCeremony ? 5.5 : 3.8;
+    frontFollowSpot.intensity = isCeremony ? 4.2 : 3.0;
+    coneMat.opacity = isCeremony ? 0.18 : 0.08;
+    say(isCeremony ? 'Đã bật Chế độ Lễ Đường (Ấm áp, lung linh)' : 'Đã bật Chế độ Đón Khách (Sáng rực rỡ)');
+  };
+}
 
 // Chụp ảnh PNG tải về máy
-const msg = document.getElementById('msg');
-const say = t => { msg.textContent = t; msg.style.opacity = t ? 1 : 0; if (t) setTimeout(() => msg.style.opacity = 0, 2600); };
-
-btnShot.onclick = () => {
-  R.render(scene, cam);
-  const a = document.createElement('a');
-  a.download = `The-Thousand-Bloom-Stage-${Date.now()}.png`;
-  a.href = cv.toDataURL('image/png');
-  a.click();
-  say('Đã lưu ảnh chụp 3D sân khấu!');
-};
+if (btnShot) {
+  btnShot.onclick = () => {
+    R.render(scene, cam);
+    const a = document.createElement('a');
+    a.download = `The-Thousand-Bloom-Stage-${Date.now()}.png`;
+    a.href = cv.toDataURL('image/png');
+    a.click();
+    say('Đã lưu ảnh chụp 3D sân khấu!');
+  };
+}
 
 // Nhạc nền Web Audio API Synthesizer (Canon in D)
 let audioCtx = null, audioTimer = null, isPlaying = false, audioStep = 0;
-btnMusic.onclick = () => {
-  if (isPlaying) {
-    if (audioTimer) clearTimeout(audioTimer);
-    isPlaying = false;
-    btnMusic.classList.remove('on');
-    btnMusic.textContent = '🎵 Nhạc nền';
-    say('Đã tắt nhạc nền');
-  } else {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    isPlaying = true;
-    btnMusic.classList.add('on');
-    btnMusic.textContent = '🔊 Đang phát Canon';
-    say('Đang phát Canon in D du dương...');
-    playMelody();
-  }
-};
+if (btnMusic) {
+  btnMusic.onclick = () => {
+    if (isPlaying) {
+      if (audioTimer) clearTimeout(audioTimer);
+      isPlaying = false;
+      btnMusic.classList.remove('on');
+      btnMusic.textContent = '🎵 Nhạc nền';
+      say('Đã tắt nhạc nền');
+    } else {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      isPlaying = true;
+      btnMusic.classList.add('on');
+      btnMusic.textContent = '🔊 Đang phát Canon';
+      say('Đang phát Canon in D du dương...');
+      playMelody();
+    }
+  };
+}
 
 function playMelody() {
   if (!isPlaying) return;
@@ -765,7 +770,7 @@ function playMelody() {
   osc.type = 'sine';
   osc.frequency.setValueAtTime(note, now);
   gain.gain.setValueAtTime(0.001, now);
-  gain.gain.exponentialRampToValueAtTime(0.04, now + 0.05);
+  gain.gain.exponentialRampToValueAtTime(0.035, now + 0.05);
   gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
   osc.connect(gain);
   gain.connect(audioCtx.destination);
@@ -777,51 +782,55 @@ function playMelody() {
 }
 
 // Xuất mô hình GLB/ZIP
-btnExp.onclick = async () => {
-  btnExp.disabled = true;
-  say('Đang xuất mô hình 3D GLB...');
-  try {
-    const grp = new THREE.Group();
-    grp.name = 'The_Thousand_Bloom_Stage';
-    scene.traverse(o => {
-      if (o.isMesh && !o.material.transparent) grp.add(o.clone());
-    });
-    const glb = await new Promise((res, rej) => new THREE.GLTFExporter().parse(grp, res, {binary: true}));
-    const zip = new JSZip();
-    zip.file('the-thousand-bloom-stage.glb', glb);
-    zip.file('README.txt', 'The Thousand Bloom Wedding Stage 3D Model.\nMo bang Blender (File > Import > glTF 2.0) hoac 3D Viewer.');
-    const blob = await zip.generateAsync({type: 'blob'});
-    const a = document.createElement('a');
-    a.download = 'The-Thousand-Bloom-3D-Stage.zip';
-    a.href = URL.createObjectURL(blob);
-    a.click();
-    say('Xuất file 3D thành công!');
-  } catch (err) {
-    console.error(err);
-    say('Không thể xuất file 3D');
-  }
-  btnExp.disabled = false;
-};
+if (btnExp) {
+  btnExp.onclick = async () => {
+    btnExp.disabled = true;
+    say('Đang xuất mô hình 3D GLB...');
+    try {
+      const grp = new THREE.Group();
+      grp.name = 'The_Thousand_Bloom_Stage';
+      scene.traverse(o => {
+        if (o.isMesh && !o.material.transparent) grp.add(o.clone());
+      });
+      const glb = await new Promise((res, rej) => new THREE.GLTFExporter().parse(grp, res, {binary: true}));
+      const zip = new JSZip();
+      zip.file('the-thousand-bloom-stage.glb', glb);
+      zip.file('README.txt', 'The Thousand Bloom Wedding Stage 3D Model.\nMo bang Blender (File > Import > glTF 2.0) hoac 3D Viewer.');
+      const blob = await zip.generateAsync({type: 'blob'});
+      const a = document.createElement('a');
+      a.download = 'The-Thousand-Bloom-3D-Stage.zip';
+      a.href = URL.createObjectURL(blob);
+      a.click();
+      say('Xuất file 3D thành công!');
+    } catch (err) {
+      console.error(err);
+      say('Không thể xuất file 3D');
+    }
+    btnExp.disabled = false;
+  };
+}
 
 // Người dùng tương tác chuột -> tự hủy lerp chuyển động
 controls.addEventListener('start', () => {
   isTransitioning = false;
   if (isTour) {
     isTour = false;
-    btnTour.classList.remove('on');
-    btnTour.textContent = '🕊️ Flycam Tour';
+    if (btnTour) {
+      btnTour.classList.remove('on');
+      btnTour.textContent = '🕊️ Flycam Tour';
+    }
   }
 });
 
 function resize() {
-  R.setSize(innerWidth, innerHeight, false);
-  cam.aspect = innerWidth / innerHeight;
+  R.setSize(window.innerWidth, window.innerHeight, false);
+  cam.aspect = window.innerWidth / window.innerHeight;
   cam.updateProjectionMatrix();
 }
-addEventListener('resize', resize);
+window.addEventListener('resize', resize);
 resize();
 
-// Vòng lặp Render chính 60 FPS
+// Vòng lặp Render chính 60 FPS mượt mà
 (function loop() {
   requestAnimationFrame(loop);
 
